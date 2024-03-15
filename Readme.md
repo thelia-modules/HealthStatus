@@ -1,55 +1,43 @@
-# Health Status
+# HealthStatus
 
-Add a short description here. You can also add a screenshot if needed.
+## 1. Retrouvez sur une page l'état de santé de votre Thelia
 
-## Installation
+- Proposer de partager des infos anonymes avec OpenStudio
+    - version thelia
+    - version modules
+    - liste des modules et état d'activité
+    - check les overrides
+    - compatibles tout mod
+    - ????
 
-### Manually
+## 2. Spécifications
 
-* Copy the module into ```<thelia_root>/local/modules/``` directory and be sure that the name of the module is HealthStatus.
-* Activate it in your thelia administration panel
+L'objectif de ce module est d'offrir aux commerçants une vision synthétique de l'état de leur Thelia,
+à la manière de WordPress (cf. https://fr.wordpress.org/support/article/site-health-screen).
 
-### Composer
+Le module utilise les données suivantes pour établir des diagnostics :
 
-Add it in your main thelia composer.json file
+- Le nom du module
+- Sa version courante
+- Si le module est activé ou non
+- S'il a été installé par composer ou manuellement (présence dans le `composer.json`)
+- S'il est surchargé (overriden) (examiner la section PSR-4 pour contrôler qu'un module est surchargé)
+- Si des portions de Thelia sont overrident (même principe)
+- Si un README figure dans le répertoire de base d'un override
 
-```
-composer require your-vendor/health-status-module:~1.0
-```
-
-## Usage
-
-Explain here how to use your module, how to configure it, etc.
-
-## Hook
-
-If your module use one or more hook, fill this part. Explain which hooks are used.
+## Diagnostics réalisé&s par le module
 
 
-## Loop
 
-If your module declare one or more loop, describe them here like this :
+### Données envoyées à thelia.net
 
-[loop name]
+Si le client a accepté de le faire, thelia va remonter des information sur thelia.net et/ou sur une instance Matomo
+On peut proposer (à valider) des stats anonymes ou non-anonymes. Les clients identifies pourront recevoir
+des notifications de mise à jour de thelia, des modules et templates.
 
-### Input arguments
+Les informations transmises sont les suivantes :
 
-|Argument |Description |
-|---      |--- |
-|**arg1** | describe arg1 with an exemple. |
-|**arg2** | describe arg2 with an exemple. |
-
-### Output arguments
-
-|Variable   |Description |
-|---        |--- |
-|$VAR1    | describe $VAR1 variable |
-|$VAR2    | describe $VAR2 variable |
-
-### Exemple
-
-Add a complete exemple of your loop
-
-## Other ?
-
-If you have other think to put, feel free to complete your readme as you want.
+- Données analytiques gérées par Matomo
+- Numéro de version de Thelia
+- Liste des modules activés avec leur type
+- Pour les clients non-anonymisés on remonte en plus les données citées au §2
