@@ -1,0 +1,238 @@
+<div class="general-block-decorator">
+    <div class="row">
+        <div class="col-md-12 title">
+            Status
+        </div>
+        <div class="col-md-12">
+            <p>The site health check shows information about your configuration and items that may need your attention.</p>
+            <div class="accordion-container">
+                <button class="toggleButton" aria-expanded="false">You have {$numberOfActiveModules} Active Modules <i class="fas fa-chevron-down"></i></button>
+                <div class="health-check-accordion-panel hidden">
+                    <table class="health-check-table" role="presentation">
+                        <tbody>
+                        <tr>
+                            <th>Module</th>
+                            <th>Version</th>
+                        </tr>
+                        {foreach $activeModules as $module}
+                        <tr>
+                            <td data-export-label="">{$module.title}</td>
+                            <td class="value">{$module.version}</td>
+                        </tr>
+                        {/foreach}
+                        </tbody>
+                    </table>
+                </div>
+                <button class="toggleButton" aria-expanded="false">You have {$numberOfInactiveModules} Inactive Modules<i class="fas fa-chevron-down"></i></button>
+                <div class="health-check-accordion-panel hidden">
+                    <table class="health-check-table" role="presentation">
+                        <tbody>
+                        <tr>
+                            <th>Module</th>
+                            <th>Version</th>
+                        </tr>
+                        {foreach $inactiveModules as $module}
+                        <tr>
+                            <td data-export-label="">{$module.title}</td>
+                            <td class="value">{$module.version}</td>
+                        </tr>
+                        {/foreach}
+                        </tbody>
+                    </table>
+                </div>
+                <button class="toggleButton" aria-expanded = "false">{$numberOfComposerModules} Modules have been installed with composer <i class="fas fa-chevron-down arrow"></i></button>
+                <div class="health-check-accordion-panel hidden">
+                    <table class="health-check-table" role="presentation">
+                        <tbody>
+                        <tr>
+                            <th>Require</th>
+                            <th>Version</th>
+                        </tr>
+                        {foreach $composerModules as $module}
+                        <tr>
+                            <td data-export-label="">{$module.code}</td>
+                            <td class="value">{$module.version}</td>
+                        </tr>
+                        {/foreach}
+                        </tbody>
+                    </table>
+                </div>
+                <button class="toggleButton" aria-expanded = "false">{$numberOfOverriddenClasses} Classes are overriden<i class="fas fa-chevron-down"></i></button>
+                <div class="health-check-accordion-panel hidden">
+                    <table class="health-check-table" role="presentation">
+                        <tbody>
+                        <tr>
+                            <th>Class</th>
+                            <th>File</th>
+                        </tr>
+                        {foreach $overriddenClasses as $class}
+                        <tr>
+                               <td data-export-label="">{$class.name}</td>
+                                <td class="value">{$class.path}</td>
+                        </tr>
+                        {/foreach}
+                        </tbody>
+                    </table>
+                </div>
+                <button class="toggleButton" aria-expanded="false">{$httpsCheck}<i class="fas fa-chevron-down"></i></button>
+                <div class="health-check-accordion-panel hidden">
+                    {if $httpsCheck == 'yes'}
+                    <p>Your adress is secure</p>
+                    {else}
+                    <p>Your adress is not secure</p>
+                    {/if}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="general-block-decorator">
+    <div class="row">
+        <div class="col-md-12 title">
+            Informations
+        </div>
+        <div class="col-md-12">
+            <p>
+                This page can be used to check the health of your Thelia installation. It will display information about your Thelia configuration, your server and your database.
+            </p>
+            <div class="accordion-container">
+                <button class="toggleButton" aria-expanded="false">Thelia<i class="fas fa-chevron-down arrow"></i></button>
+                <div class="health-check-accordion-panel hidden">
+                    <table class="health-check-table" role="presentation">
+                        <tbody>
+                        {foreach $theliaConfig as $config}
+                        <tr>
+                            <td data-export-label="{$config.label}">{$config.label}</td>
+                            <td class="value">{$config.value}</td>
+                        </tr>
+                        {/foreach}
+                        </tbody>
+                    </table>
+                </div>
+                <button class="toggleButton" aria-expanded="false">Server<i class="fas fa-chevron-down arrow"></i></button>
+                <div class="health-check-accordion-panel hidden">
+                    <table class="health-check-table" role="presentation">
+                        <tbody>
+                        {foreach $phpConfig as $config}
+                        <tr>
+                            <td data-export-label="{$config.label}">{$config.label}</td>
+                            <td class="value">{$config.value}</td>
+                        </tr>
+                        {/foreach}
+                        </tbody>
+                    </table>
+                </div>
+                <button class="toggleButton" aria-expanded="false">Database<i class="fas fa-chevron-down arrow"></i></button>
+                <div class="health-check-accordion-panel hidden">
+                    <table class="health-check-table" role="presentation">
+                        <tbody>
+                        {foreach $databaseConfig as $config}
+                        <tr>
+                            <td data-export-label="{$config.label}">{$config.label}</td>
+                            <td class="value">{$config.value}</td>
+                        </tr>
+                        {/foreach}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var toggleButtons = document.querySelectorAll('.toggleButton');
+
+        toggleButtons.forEach(function(toggleButton) {
+            var accordionContent = toggleButton.nextElementSibling;
+            toggleButton.addEventListener('click', function() {
+                var isExpanded = toggleButton.getAttribute('aria-expanded') === 'true';
+                toggleButton.setAttribute('aria-expanded', !isExpanded);
+                accordionContent.classList.toggle('hidden');
+            });
+        });
+    });
+</script>
+
+
+<style>
+
+    .accordion-container {
+        border:#a6a6a6 1px solid;
+        margin-top: 20px;
+    }
+
+    .toggleButton {
+        background-color: #ffffff;
+        color: #646464;
+        font-weight: bold;
+        padding: 15px;
+        border: 0;
+        display:flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        font-size:16px;
+        border-top: #a6a6a6 1px solid;
+    }
+
+    .toggleButton div span{
+        color: orange;
+        margin-right: 3em;
+        padding: 5px 10px;
+        font-size: 13px;
+        border: orange 1px solid;
+
+    }
+
+    .title {
+        font-size: 20px;
+    }
+
+    .health-check-accordion-panel {
+        margin-top: 5px;
+        padding: 15px;
+    }
+
+    .health-check-table {
+        width: 100%;
+        border:#a6a6a6 1px solid;
+    }
+
+    .health-check-table tbody tr {
+        height: 40px;
+        font-size: 14px;
+    }
+
+    .health-check-table tbody tr th {
+        font-weight: bold;
+        text-align: left;
+        padding: 10px;
+    }
+
+    .toggleButton:first-child {
+        border-top: 0;
+    }
+
+    .health-check-table tbody tr:nth-child(odd) {
+        background-color: #ffffff;
+    }
+
+    .health-check-table tbody tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    .health-check-table td {
+        padding: 10px;
+    }
+
+    .health-check-table td.value {
+        width: 40%;
+    }
+
+</style>
