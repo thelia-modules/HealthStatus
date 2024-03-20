@@ -6,6 +6,7 @@ use ReflectionClass;
 use Thelia\Core\Event\Hook\HookRenderEvent;
 use Thelia\Core\Hook\BaseHook;
 use Thelia\Model\ConfigQuery;
+use const http\Client\Curl\VERSIONS;
 
 class ConfigHook extends BaseHook
 {
@@ -23,8 +24,8 @@ class ConfigHook extends BaseHook
                 'value' => $_SERVER['HTTP_HOST'],
             ],
             'https' => [
-                'label' => 'Https activé ou non ?',
-                'value' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? "activé" : "désactivé",
+                'label' => 'HTTPS Status',
+                'value' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'on' : 'off',
             ],
             'langUser' => [
                 'label' => 'Language User',
@@ -66,13 +67,13 @@ class ConfigHook extends BaseHook
             ],
 
             'safeMode' => [
-                'label' => 'Safe mode enabled ?',
-                'value' => ini_get('safe_mode') ? "activé" : "désactivé",
+                'label' => 'Safe Mode',
+                'value' => ini_get('safe_mode') ? 'on' : 'off',
             ],
 
             'curlVersion' => [
                 'label' => 'Curl Version',
-                'value' => function_exists('curl_version') ? curl_version()['version'] : 'not installed',
+                'value' => function_exists('curl_version') ? curl_version()['version'] : 'off',
             ],
 
             'currentTime' => [
@@ -100,11 +101,11 @@ class ConfigHook extends BaseHook
 
         $databaseConfig = [
             'mysql' => [
-                'label' => 'Server version',
+                'label' => 'Server Version',
                 'value' => $mySQLversion,
             ],
             'client_version' => [
-                'label' => 'Client version',
+                'label' => 'Client Version',
                 'value' => $mysqlCon->client_info,
             ],
             'host' => [
@@ -116,7 +117,7 @@ class ConfigHook extends BaseHook
                 'value' => $user
             ],
             'database' => [
-                'label' => 'Database name ',
+                'label' => 'Database Name',
                 'value' => $database
             ],
             'charset' => [
@@ -128,11 +129,11 @@ class ConfigHook extends BaseHook
                 'value' => $collation
             ],
             'max_allowed_packet' => [
-                'label' => 'Max allowed packet',
+                'label' => 'Max Allowed Packet',
                 'value' => $maxAllowedPacket,
             ],
             'max_connections' => [
-                'label' => 'Max connections',
+                'label' => 'Max Connections',
                 'value' => $maxConnections,
             ],
         ];
@@ -179,9 +180,15 @@ class ConfigHook extends BaseHook
         //check if all the classes are overridden with reflectionclass
 
         $classes = get_declared_classes();
+        ///get only thelia classes
+
+        $classesThelia = array_filter($classes, function ($class) {
+            return strpos($class, 'Thelia') !== false;
+        });
+
         $overriddenClasses = [];
 
-        foreach ($classes as $class) {
+        foreach ($classesThelia as $class) {
             $reflectionClass = new ReflectionClass($class);
             $fullPath = $reflectionClass->getFileName();
             if ($reflectionClass->isUserDefined()) {
@@ -202,7 +209,7 @@ class ConfigHook extends BaseHook
 
         #####################################################HTTPS#####################################################
 
-        $httpsCheck = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? "Https is enabled" : "Https is not enabled";
+        $httpsCheck = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'yes' : 'no';
 
 
         $event->add(
