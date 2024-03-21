@@ -6,7 +6,7 @@ use ReflectionClass;
 use Thelia\Core\Event\Hook\HookRenderEvent;
 use Thelia\Core\Hook\BaseHook;
 use Thelia\Model\ConfigQuery;
-use const http\Client\Curl\VERSIONS;
+use Thelia\Model\ModuleQuery;
 
 class ConfigHook extends BaseHook
 {
@@ -138,9 +138,38 @@ class ConfigHook extends BaseHook
             ],
         ];
 
-      #####################################################MODULES#####################################################
+        #####################################################PERF#####################################################
 
-        $modules = \Thelia\Model\ModuleQuery::create()->find();
+
+        $performance = [
+            'memoryUsage' => [
+                'label' => 'Memory usage',
+                'value' => memory_get_usage() ,
+            ],
+            'peakMemoryUsage' => [
+                'label' => 'Peak memory usage',
+                'value' => memory_get_peak_usage(),
+            ],
+        ];
+
+        #####################################################TYPES#####################################################
+
+        function determineType($fieldName): string{
+            switch ($fieldName) {
+                case 'numberOfActiveModules':
+                case 'numberOfInactiveModules':
+                case 'numberOfOverriddenClasses':
+                    return 'performance';
+                case 'httpsCheck':
+                    return 'sécurité';
+                default:
+                    return 'indéterminé';
+            }
+        }
+
+        #####################################################MODULES#####################################################
+
+        $modules = ModuleQuery::create()->find();
         $modulesList = [];
         foreach ($modules as $module) {
             $modulesList[]= [
@@ -160,7 +189,12 @@ class ConfigHook extends BaseHook
         });
 
         $numberOfActiveModules = count($activeModules);
-        $numberOfInactiveModules = count($inactiveModules);
+
+        $numberOfInactiveModules = [
+            'value' => count($inactiveModules),
+            'type' => determineType('numberOfInactiveModules'),
+        ];
+
 
         $composerJsonPath = '/Users/glaissus/Desktop/thelia-modules/thelia/composer.json';
         $composerModules = [];
@@ -173,6 +207,7 @@ class ConfigHook extends BaseHook
                 ];
             }
         }
+
         $numberOfComposerModules = count($composerModules);
 
         #####################################################OVERRIDES#####################################################
@@ -205,12 +240,17 @@ class ConfigHook extends BaseHook
             }
         }
 
-        $numberOfOverriddenClasses = count($overriddenClasses);
+        $numberOfOverriddenClasses = [
+            'value' => count($overriddenClasses),
+            'type' => determineType('numberOfOverriddenClasses'),
+        ];
 
         #####################################################HTTPS#####################################################
 
-        $httpsCheck = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'yes' : 'no';
-
+        $httpsCheck = [
+            'value' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'yes' : 'no',
+            'type' => determineType('httpsCheck'),
+        ];
 
         $event->add(
             $this->render(
@@ -228,6 +268,7 @@ class ConfigHook extends BaseHook
                     'numberOfComposerModules' => $numberOfComposerModules,
                     'numberOfOverriddenClasses' => $numberOfOverriddenClasses,
                     'httpsCheck' => $httpsCheck,
+                    'performance' => $performance,
                 ]
             )
         );

@@ -56,7 +56,9 @@ return [
     'Max Allowed Packet' => 'Paquets max autorisés',
     'Max Connections' => 'Connexions max',
 
-
-
-
+    ##### PERF #####
+    'Performance' => 'Performances',
+    'Memory usage' => 'Utilisation mémoire',
+    'Peak memory usage' => 'Pic d\'utilisation mémoire',
+    'bytes' => 'octets',
 ];
