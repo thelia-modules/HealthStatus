@@ -1,14 +1,14 @@
-<div class="general-block-decorator">
-    <div class="row">
-        <div class="col-md-12 title">
+<div class='general-block-decorator'>
+    <div class='row'>
+        <div class='col-md-12 title'>
             Status
         </div>
-        <div class="col-md-12">
+        <div class='col-md-12'>
             <p>The site health check shows information about your configuration and items that may need your attention.</p>
-            <div class="accordion-container">
-                <button class="toggleButton" aria-expanded="false">{intl l='You have' d='healthstatus.bo.default'} {$numberOfActiveModules} {intl l='active modules' d='healthstatus.bo.default'}<i class="fas fa-chevron-down"></i></button>
-                <div class="health-check-accordion-panel hidden">
-                    <table class="health-check-table" role="presentation">
+            <div class='accordion-container'>
+                <button class='toggleButton' aria-expanded='false'>{intl l='You have' d='healthstatus.bo.default'} {$numberOfActiveModules} {intl l='active modules' d='healthstatus.bo.default'}<i class='fas fa-chevron-down'></i></button>
+                <div class='health-check-accordion-panel hidden'>
+                    <table class='health-check-table' role='presentation'>
                         <tbody>
                         <tr>
                             <th>Module</th>
@@ -17,18 +17,18 @@
                         {foreach $activeModules as $module}
                         <tr>
                             <td data-export-label="">{$module.title}</td>
-                            <td class="value">{$module.version}</td>
+                            <td class='value'>{$module.version}</td>
                         </tr>
                         {/foreach}
                         </tbody>
                     </table>
                 </div>
-                <button class="toggleButton" aria-expanded="false">{intl l='You have' d='healthstatus.bo.default'} {$numberOfInactiveModules.value} {intl l='inactive modules' d='healthstatus.bo.default'} <div>
-                    <span class="type">{$numberOfInactiveModules.type}</span>
-                    <i class="fas fa-chevron-down"></i></div></button>
-                <div class="health-check-accordion-panel hidden">
+                <button class='toggleButton' aria-expanded='false'>{intl l='You have' d='healthstatus.bo.default'} {$numberOfInactiveModules.value} {intl l='inactive modules' d='healthstatus.bo.default'} <div>
+                    <span class='type'>{$numberOfInactiveModules.type}</span>
+                    <i class='fas fa-chevron-down'></i></div></button>
+                <div class='health-check-accordion-panel hidden'>
                     <p>{intl l='Inactive modules are modules that are installed but not enabled. They can be enabled in the module configuration page.' d='healthstatus.bo.default'}</p>
-                    <table class="health-check-table" role="presentation">
+                    <table class='health-check-table' role='presentation'>
                         <tbody>
                         <tr>
                             <th>Module</th>
@@ -37,15 +37,15 @@
                         {foreach $inactiveModules as $module}
                         <tr>
                             <td data-export-label="">{$module.title}</td>
-                            <td class="value">{$module.version}</td>
+                            <td class='value'>{$module.version}</td>
                         </tr>
                         {/foreach}
                         </tbody>
                     </table>
                 </div>
-                <button class="toggleButton" aria-expanded = "false">{$numberOfComposerModules} modules {intl l='have been installed with composer' d='healthstatus.bo.default'}<i class="fas fa-chevron-down"></i></button>
-                <div class="health-check-accordion-panel hidden">
-                    <table class="health-check-table" role="presentation">
+                <button class='toggleButton' aria-expanded = 'false'>{$numberOfComposerModules} modules {intl l='have been installed with composer' d='healthstatus.bo.default'}<i class='fas fa-chevron-down'></i></button>
+                <div class='health-check-accordion-panel hidden'>
+                    <table class='health-check-table' role='presentation'>
                         <tbody>
                         <tr>
                             <th>Require</th>
@@ -54,18 +54,18 @@
                         {foreach $composerModules as $module}
                         <tr>
                             <td data-export-label="">{$module.code}</td>
-                            <td class="value">{$module.version}</td>
+                            <td class='value'>{$module.version}</td>
                         </tr>
                         {/foreach}
                         </tbody>
                     </table>
                 </div>
-                <button class="toggleButton" aria-expanded = "false">{$numberOfOverriddenClasses.value} classes {intl l='are overriden' d='healthstatus.bo.default'}<div>
-                    <span class="type">{$numberOfOverriddenClasses.type}</span>
-                    <i class="fas fa-chevron-down"></i></div></button>
-                <div class="health-check-accordion-panel hidden">
+                <button class='toggleButton' aria-expanded = 'false'>{$numberOfOverriddenClasses.value} classes {intl l='are overriden' d='healthstatus.bo.default'}<div>
+                    <span class='type'>{$numberOfOverriddenClasses.type}</span>
+                    <i class='fas fa-chevron-down'></i></div></button>
+                <div class='health-check-accordion-panel hidden'>
                     <p>{intl l='Overridden classes are classes that have been modified in your project. They can be found in the following table.' d='healthstatus.bo.default'}</p>
-                    <table class="health-check-table" role="presentation">
+                    <table class='health-check-table' role='presentation'>
                         <tbody>
                         <tr>
                             <th>Class</th>
@@ -74,28 +74,28 @@
                         {foreach $overriddenClasses as $class}
                         <tr>
                             <td data-export-label="">{$class.name}</td>
-                            <td class="value">{$class.path}</td>
+                            <td class='value'>{$class.path}</td>
                         </tr>
                         {/foreach}
                         </tbody>
                     </table>
                 </div>
-                <button class="toggleButton" aria-expanded="false">
+                <button class='toggleButton' aria-expanded='false'>
                     HTTPS {if $httpsCheck == 'yes'}
-                    {intl l="is enabled" d='healthstatus.bo.default'}
+                    {intl l='is enabled' d='healthstatus.bo.default'}
                     {else}
-                    {intl l="is disabled" d='healthstatus.bo.default'}
+                    {intl l='is disabled' d='healthstatus.bo.default'}
                     {/if}
                     <div>
-                        <span class="type">{$httpsCheck.type}</span>
-                        <i class="fas fa-chevron-down"></i></div></button>
+                        <span class='type'>{$httpsCheck.type}</span>
+                        <i class='fas fa-chevron-down'></i></div></button>
                 </button>
 
-                <div class="health-check-accordion-panel hidden">
+                <div class='health-check-accordion-panel hidden'>
                     {if $httpsCheck == 'yes'}
-                    <p>{intl l="Your adress is secure" d='healthstatus.bo.default'}
+                    <p>{intl l='Your adress is secure' d='healthstatus.bo.default'}
                         {else}
-                    <p>{intl l="Your adress is not secure" d='healthstatus.bo.default'}
+                    <p>{intl l='Your adress is not secure' d='healthstatus.bo.default'}
                         {/if}
                 </div>
             </div>
@@ -104,79 +104,79 @@
 </div>
 
 
-<div class="general-block-decorator">
-    <div class="row">
-        <div class="col-md-12 title">
+<div class='general-block-decorator'>
+    <div class='row'>
+        <div class='col-md-12 title'>
             Informations
         </div>
-        <div class="col-md-12">
-            <button id="copyConfigButton" class="btn btn-default">Copier la configuration</button>
+        <div class='col-md-12'>
+            <button id='copyConfigButton' class='btn btn-default'>Copier la configuration</button>
             <p>
                 This page can be used to check the health of your Thelia installation. It will display information about your Thelia configuration, your server and your database.
             </p>
-            <div class="accordion-container" id="info-config">
-                <button class="toggleButton" aria-expanded="false">Thelia<i class="fas fa-chevron-down arrow"></i></button>
-                <div class="health-check-accordion-panel hidden">
-                    <table class="health-check-table" role="presentation">
+            <div class='accordion-container' id='info-config'>
+                <button class='toggleButton' aria-expanded='false'>Thelia<i class='fas fa-chevron-down arrow'></i></button>
+                <div class='health-check-accordion-panel hidden'>
+                    <table class='health-check-table' role='presentation'>
                         <tbody>
                         {foreach $theliaConfig as $config}
                         <tr>
-                            <td data-export-label="{intl l=$config.label d='healthstatus.bo.default'}">{intl l=$config.label d='healthstatus.bo.default'}</td>
-                            <td class="value">{$config.value}</td>
+                            <td data-export-label='{intl l=$config.label d='healthstatus.bo.default'}'>{intl l=$config.label d='healthstatus.bo.default'}</td>
+                            <td class='value'>{$config.value}</td>
                         </tr>
                         {/foreach}
                         </tbody>
                     </table>
                 </div>
-                <button class="toggleButton" aria-expanded="false">{intl l='Server' d='healthstatus.bo.default'}<i class="fas fa-chevron-down arrow"></i></button>
-                {assign var="counter" value=0}
-                <div class="health-check-accordion-panel hidden">
-                    <table class="health-check-table" role="presentation">
+                <button class='toggleButton' aria-expanded='false'>{intl l='Server' d='healthstatus.bo.default'}<i class='fas fa-chevron-down arrow'></i></button>
+                {assign var='counter' value=0}
+                <div class='health-check-accordion-panel hidden'>
+                    <table class='health-check-table' role='presentation'>
                         <tbody>
                         {foreach $phpConfig as $config}
                         <tr>
-                            <td data-export-label="{intl l=$config.label d='healthstatus.bo.default'}">{intl l=$config.label d='healthstatus.bo.default'}</td>
-                            <td class="value">
+                            <td data-export-label='{intl l=$config.label d='healthstatus.bo.default'}'>{intl l=$config.label d='healthstatus.bo.default'}</td>
+                            <td class='value'>
                                 {$config.value}
                                 {if $counter == 1}
-                                {if $config.value < '8.0.2'}<span class="error"> {intl l='(Minimum version required: 8.0.2)' d='healthstatus.bo.default'}</span> {else} <span class="success"> {intl l='(OK)' d='healthstatus.bo.default'}</span> {/if}
+                                {if $config.value < '8.0.2'}<span class='error'> {intl l='(Minimum version required: 8.0.2)' d='healthstatus.bo.default'}</span> {else} <span class='success'> {intl l='(OK)' d='healthstatus.bo.default'}</span> {/if}
                                 {elseif $counter == 2}
-                                {if $config.value < 128 }<span class="error"> {intl l='(Preferably 256M)' d='healthstatus.bo.default'}</span> {else} <span class="success"> {intl l='(OK)' d='healthstatus.bo.default'}</span> {/if}
+                                {if $config.value < 128 }<span class='error'> {intl l='(Preferably 256M)' d='healthstatus.bo.default'}</span> {else} <span class='success'> {intl l='(OK)' d='healthstatus.bo.default'}</span> {/if}
                                 {elseif $counter == 3}
-                                {if $config.value < 20 }<span class="error"> {intl l='(Preferably 20M)' d='healthstatus.bo.default'}</span> {else} <span class="success"> {intl l='(OK)' d='healthstatus.bo.default'}</span> {/if}
+                                {if $config.value < 20 }<span class='error'> {intl l='(Preferably 20M)' d='healthstatus.bo.default'}</span> {else} <span class='success'> {intl l='(OK)' d='healthstatus.bo.default'}</span> {/if}
                                 {elseif $counter == 4}
-                                {if $config.value < 2 }<span class="error"> {intl l='(Preferably 2M)' d='healthstatus.bo.default'}</span> {else} <span class="success"> {intl l='(OK)' d='healthstatus.bo.default'}</span> {/if}
+                                {if $config.value < 2 }<span class='error'> {intl l='(Preferably 2M)' d='healthstatus.bo.default'}</span> {else} <span class='success'> {intl l='(OK)' d='healthstatus.bo.default'}</span> {/if}
                                 {elseif $counter == 5}
-                                {if $config.value !== 'off' }<span class="error"> {intl l='(Disable it preferably)' d='healthstatus.bo.default'}</span> {else} <span class="success"> {intl l='(OK)' d='healthstatus.bo.default'}</span> {/if}
+                                {if $config.value !== 'off' }<span class='error'> {intl l='(Disable it preferably)' d='healthstatus.bo.default'}</span> {else} <span class='success'> {intl l='(OK)' d='healthstatus.bo.default'}</span> {/if}
                                 {/if}
                             </td>
                         </tr>
-                        {assign var="counter" value=$counter+1}
+                        {assign var='counter' value=$counter+1}
                         {/foreach}
                         </tbody>
                     </table>
                 </div>
-                <button class="toggleButton" aria-expanded="false">{intl l='Database' d='healthstatus.bo.default'}<i class="fas fa-chevron-down arrow"></i></button>
-                <div class="health-check-accordion-panel hidden">
-                    <table class="health-check-table" role="presentation">
+                <button class='toggleButton' aria-expanded='false'>{intl l='Database' d='healthstatus.bo.default'}<i class='fas fa-chevron-down arrow'></i></button>
+                <div class='health-check-accordion-panel hidden'>
+                    <table class='health-check-table' role='presentation'>
                         <tbody>
                         {foreach $databaseConfig as $config}
                         <tr>
-                            <td data-export-label="{intl l=$config.label d='healthstatus.bo.default'}">{intl l=$config.label d='healthstatus.bo.default'}</td>
-                            <td class="value">{$config.value}</td>
+                            <td data-export-label='{intl l=$config.label d='healthstatus.bo.default'}'>{intl l=$config.label d='healthstatus.bo.default'}</td>
+                            <td class='value'>{$config.value}</td>
                         </tr>
                         {/foreach}
                         </tbody>
                     </table>
                 </div>
-                <button class="toggleButton" aria-expanded="false">{intl l='Performance' d='healthstatus.bo.default'}<i class="fas fa-chevron-down arrow"></i></button>
-                <div class="health-check-accordion-panel hidden">
-                    <table class="health-check-table" role="presentation">
+                <button class='toggleButton' aria-expanded='false'>{intl l='Performance' d='healthstatus.bo.default'}<i class='fas fa-chevron-down arrow'></i></button>
+                <div class='health-check-accordion-panel hidden'>
+                    <table class='health-check-table' role='presentation'>
                         <tbody>
                         {foreach $performance as $config}
                         <tr>
-                            <td data-export-label="{intl l=$config.label d='healthstatus.bo.default'}">{intl l=$config.label d='healthstatus.bo.default'}</td>
-                            <td class="value">{$config.value} {intl l='bytes' d='healthstatus.bo.default'}</td>
+                            <td data-export-label='{intl l=$config.label d='healthstatus.bo.default'}'>{intl l=$config.label d='healthstatus.bo.default'}</td>
+                            <td class='value'>{$config.value} {intl l='bytes' d='healthstatus.bo.default'}</td>
                         </tr>
                         {/foreach}
                         </tbody>
@@ -201,14 +201,13 @@
         });
     });
 
-
-    document.getElementById('copyConfigButton').addEventListener('click', function() {
+    document.getElementById('copyConfigButton').addEventListener('click', function () {
         var allData = '';
 
         var sectionButtons = document.querySelectorAll('#info-config .toggleButton');
 
-        sectionButtons.forEach(function(button) {
-            allData += button.innerText.trim() + ' : \n';
+        sectionButtons.forEach(function (button) {
+            allData += '########## ' + button.innerText.trim() + ' ##########\n\n';
 
             var section = button.nextElementSibling;
             var labelElements = section.querySelectorAll('td[data-export-label]');
@@ -217,12 +216,11 @@
             for (var i = 0; i < labelElements.length; i++) {
                 var label = labelElements[i].innerText.trim();
                 var valueElement = valueElements[i];
-                var value = valueElement.innerHTML.replace(/<span class="(error|success)">.*?<\/span>/g, '').trim();
+                var value = valueElement.innerHTML.replace(/<span class='(error|success)'>.*?<\/span>/g, '').trim();
                 allData += label + ': ' + value + '\n';
             }
             allData += '\n';
         });
-
         navigator.clipboard.writeText(allData);
     });
 
@@ -297,7 +295,7 @@
         width: 40%;
     }
 
-    .type{
+    .type {
         margin-right: 20px;
         height: 10px;
         padding: 5px;
@@ -310,7 +308,6 @@
         padding: 10px;
         color: #fff;
     }
-
 
 
 </style>

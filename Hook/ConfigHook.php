@@ -10,8 +10,8 @@ use Thelia\Model\ModuleQuery;
 
 class ConfigHook extends BaseHook
 {
-    public function onModuleConfiguration(HookRenderEvent $event){
-
+    public function onModuleConfiguration(HookRenderEvent $event)
+    {
         #####################################################THELIA CONFIG#####################################################
 
         $theliaConfig = [
@@ -25,7 +25,10 @@ class ConfigHook extends BaseHook
             ],
             'https' => [
                 'label' => 'HTTPS Status',
-                'value' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'on' : 'off',
+                'value' =>
+                    !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'
+                        ? 'on'
+                        : 'off',
             ],
             'langUser' => [
                 'label' => 'Language User',
@@ -73,7 +76,9 @@ class ConfigHook extends BaseHook
 
             'curlVersion' => [
                 'label' => 'Curl Version',
-                'value' => function_exists('curl_version') ? curl_version()['version'] : 'off',
+                'value' => function_exists('curl_version')
+                    ? curl_version()['version']
+                    : 'off',
             ],
 
             'currentTime' => [
@@ -88,16 +93,24 @@ class ConfigHook extends BaseHook
             'localhost',
             'root',
             'root',
-            'thelia-modules',
+            'thelia-modules'
         );
         $mySQLversion = mysqli_get_server_info($mysqlCon);
         $host = $mysqlCon->query('SELECT @@hostname')->fetch_row()[0];
         $user = $mysqlCon->query('SELECT USER()')->fetch_row()[0];
         $database = $mysqlCon->query('SELECT DATABASE()')->fetch_row()[0];
-        $charset = $mysqlCon->query('SELECT @@character_set_database')->fetch_row()[0];
-        $collation = $mysqlCon->query('SELECT @@collation_database')->fetch_row()[0];
-        $maxAllowedPacket = $mysqlCon->query('SELECT @@max_allowed_packet')->fetch_row()[0];
-        $maxConnections = $mysqlCon->query('SELECT @@max_connections')->fetch_row()[0];
+        $charset = $mysqlCon
+            ->query('SELECT @@character_set_database')
+            ->fetch_row()[0];
+        $collation = $mysqlCon
+            ->query('SELECT @@collation_database')
+            ->fetch_row()[0];
+        $maxAllowedPacket = $mysqlCon
+            ->query('SELECT @@max_allowed_packet')
+            ->fetch_row()[0];
+        $maxConnections = $mysqlCon
+            ->query('SELECT @@max_connections')
+            ->fetch_row()[0];
 
         $databaseConfig = [
             'mysql' => [
@@ -110,23 +123,23 @@ class ConfigHook extends BaseHook
             ],
             'host' => [
                 'label' => 'Host',
-                'value' => $host
+                'value' => $host,
             ],
             'user' => [
                 'label' => 'User',
-                'value' => $user
+                'value' => $user,
             ],
             'database' => [
                 'label' => 'Database Name',
-                'value' => $database
+                'value' => $database,
             ],
             'charset' => [
                 'label' => 'Charset',
-                'value' => $charset
+                'value' => $charset,
             ],
             'collation' => [
                 'label' => 'Collation',
-                'value' => $collation
+                'value' => $collation,
             ],
             'max_allowed_packet' => [
                 'label' => 'Max Allowed Packet',
@@ -140,11 +153,10 @@ class ConfigHook extends BaseHook
 
         #####################################################PERF#####################################################
 
-
         $performance = [
             'memoryUsage' => [
                 'label' => 'Memory usage',
-                'value' => memory_get_usage() ,
+                'value' => memory_get_usage(),
             ],
             'peakMemoryUsage' => [
                 'label' => 'Peak memory usage',
@@ -154,7 +166,8 @@ class ConfigHook extends BaseHook
 
         #####################################################TYPES#####################################################
 
-        function determineType($fieldName): string{
+        function determineType($fieldName): string
+        {
             switch ($fieldName) {
                 case 'numberOfActiveModules':
                 case 'numberOfInactiveModules':
@@ -172,7 +185,7 @@ class ConfigHook extends BaseHook
         $modules = ModuleQuery::create()->find();
         $modulesList = [];
         foreach ($modules as $module) {
-            $modulesList[]= [
+            $modulesList[] = [
                 'code' => $module->getCode(),
                 'title' => $module->getTitle(),
                 'version' => $module->getVersion(),
@@ -195,10 +208,13 @@ class ConfigHook extends BaseHook
             'type' => determineType('numberOfInactiveModules'),
         ];
 
-
-        $composerJsonPath = '/Users/glaissus/Desktop/thelia-modules/thelia/composer.json';
+        $composerJsonPath =
+            '/Users/glaissus/Desktop/thelia-modules/thelia/composer.json';
         $composerModules = [];
-        $composerModulesList = json_decode(file_get_contents($composerJsonPath), true)['require'];
+        $composerModulesList = json_decode(
+            file_get_contents($composerJsonPath),
+            true
+        )['require'];
         foreach ($composerModulesList as $key => $value) {
             if (strpos($key, 'thelia') !== false) {
                 $composerModules[] = [
@@ -248,29 +264,29 @@ class ConfigHook extends BaseHook
         #####################################################HTTPS#####################################################
 
         $httpsCheck = [
-            'value' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'yes' : 'no',
+            'value' =>
+                !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'
+                    ? 'yes'
+                    : 'no',
             'type' => determineType('httpsCheck'),
         ];
 
         $event->add(
-            $this->render(
-                'config/module-config.html',
-                [
-                    'theliaConfig' => $theliaConfig,
-                    'phpConfig' => $phpConfig,
-                    'databaseConfig' => $databaseConfig,
-                    'activeModules' => $activeModules,
-                    'inactiveModules' => $inactiveModules,
-                    'composerModules' => $composerModules,
-                    'overriddenClasses' => $overriddenClasses,
-                    'numberOfActiveModules' => $numberOfActiveModules,
-                    'numberOfInactiveModules' => $numberOfInactiveModules,
-                    'numberOfComposerModules' => $numberOfComposerModules,
-                    'numberOfOverriddenClasses' => $numberOfOverriddenClasses,
-                    'httpsCheck' => $httpsCheck,
-                    'performance' => $performance,
-                ]
-            )
+            $this->render('config/module-config.html', [
+                'theliaConfig' => $theliaConfig,
+                'phpConfig' => $phpConfig,
+                'databaseConfig' => $databaseConfig,
+                'activeModules' => $activeModules,
+                'inactiveModules' => $inactiveModules,
+                'composerModules' => $composerModules,
+                'overriddenClasses' => $overriddenClasses,
+                'numberOfActiveModules' => $numberOfActiveModules,
+                'numberOfInactiveModules' => $numberOfInactiveModules,
+                'numberOfComposerModules' => $numberOfComposerModules,
+                'numberOfOverriddenClasses' => $numberOfOverriddenClasses,
+                'httpsCheck' => $httpsCheck,
+                'performance' => $performance,
+            ])
         );
     }
 }
