@@ -22,9 +22,5 @@
         <tag name="hook.event_listener" event="main.top-menu-tools" type="back" method="onMainTopMenuTools" />
       </hook>
 
-      <hook id="health_status.hook.front">
-        <tag name="hook.event_listener" event="home.body" templates="render:home-body.html" />
-      </hook>
-
     </hooks>
 </config>
