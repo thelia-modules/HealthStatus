@@ -9,11 +9,11 @@ class DefineTypeConfig
         switch ($fieldName) {
             case 'numberOfActiveModules':
             case 'numberOfInactiveModules':
-                return 'performance';
+                return 'Performance';
             case 'httpsCheck':
-                return 'sécurité';
+                return 'Security';
             default:
-                return 'indéterminé';
+                return 'Unknown';
         }
     }
 }

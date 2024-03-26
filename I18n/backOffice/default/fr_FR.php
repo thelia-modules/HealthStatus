@@ -24,6 +24,10 @@ return [
     'is enabled' => 'est activé',
     'Your adress is secure' => 'Votre adresse est sécurisée',
     'Your adress is not secure' => 'Votre adresse n\'est pas sécurisée',
+    'Your version' => 'Votre version',
+    'Latest version' => 'Dernière version',
+    'Not found' => 'Non trouvé',
+    'override(s) files have been detected' => 'fichier(s) overrides ont été détectés',
 
     ##### THELIA #####
     'Thelia Version' => 'Version de Thelia',
@@ -58,6 +62,7 @@ return [
 
     ##### PERF #####
     'Performance' => 'Performances',
+    'Security' => 'Sécurité',
     'Memory usage' => 'Utilisation mémoire',
     'Peak memory usage' => 'Pic d\'utilisation mémoire',
     'bytes' => 'octets',

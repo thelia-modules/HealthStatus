@@ -12,7 +12,7 @@
 
 namespace HealthStatus\Hook;
 
-use ApiConfig\Service\ApiConfig;
+use HealthStatus\Service\CheckOverridesConfig;
 use HealthStatus\Service\ComposerModulesConfig;
 use HealthStatus\Service\DatabaseConfig;
 use HealthStatus\Service\HttpsCheckConfig;
@@ -55,6 +55,10 @@ class ConfigHook extends BaseHook
         $httpsCheck = new HttpsCheckConfig();
         $httpsCheck = $httpsCheck->getHttpsCheck();
 
+        $checkOverrideServices = new CheckOverridesConfig();
+        $checkOverrideFiles = $checkOverrideServices->getOverrides();
+        $numberOfOverride = $checkOverrideServices->getNumberOfOverrides($checkOverrideFiles);
+
         $event->add(
             $this->render('config/module-config.html', [
                 'theliaConfig' => $theliaConfig,
@@ -68,6 +72,8 @@ class ConfigHook extends BaseHook
                 'numberOfComposerModules' => $numberOfComposerModules,
                 'httpsCheck' => $httpsCheck,
                 'performance' => $performance,
+                'overrideFiles' => $checkOverrideFiles,
+                'numberOfOverride' => $numberOfOverride,
             ])
         );
     }

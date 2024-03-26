@@ -12,19 +12,29 @@
                         <tbody>
                         <tr>
                             <th>Module</th>
-                            <th>Version</th>
+                            <th>{intl l='Your version' d='healthstatus.bo.default'}</th>
+                            <th>{intl l='Latest version' d='healthstatus.bo.default'}</th>
                         </tr>
                         {foreach $activeModules as $module}
                         <tr>
-                            <td data-export-label="">{$module.title}</td>
-                            <td class="value">{$module.version}</td>
+                            <td data-export-label="">{$module.code} - {$module.title}</td>
+                            {if $module.version < $module.latestVersion}
+                            <td class="version-outdated"><span>{$module.version}</span></td>
+                            {else}
+                            <td class="version-up-to-date"><span>{$module.version}</span></td>
+                            {/if}
+                            {if $module.latestVersion === '0'}
+                            <td class="unknown-version"><span>{intl l='Not found' d='healthstatus.bo.default'}</span></td>
+                            {else}
+                            <td class="latest"><span>{$module.latestVersion}</span></td>
+                            {/if}
                         </tr>
                         {/foreach}
                         </tbody>
                     </table>
                 </div>
                 <button class="toggleButton" aria-expanded="false">{intl l='You have' d='healthstatus.bo.default'} {$numberOfInactiveModules.value} {intl l='inactive modules' d='healthstatus.bo.default'} <div>
-                    <span class="type">{$numberOfInactiveModules.type}</span>
+                    <span class="type">{intl l=$numberOfInactiveModules.type d='healthstatus.bo.default'}</span>
                     <i class="fas fa-chevron-down"></i></div></button>
                 <div class="health-check-accordion-panel hidden">
                     <p>{intl l='Inactive modules are modules that are installed but not enabled. They can be enabled in the module configuration page.' d='healthstatus.bo.default'}</p>
@@ -32,12 +42,22 @@
                         <tbody>
                         <tr>
                             <th>Module</th>
-                            <th>Version</th>
+                            <th>{intl l='Your version' d='healthstatus.bo.default'}</th>
+                            <th>{intl l='Latest version' d='healthstatus.bo.default'}</th>
                         </tr>
                         {foreach $inactiveModules as $module}
                         <tr>
-                            <td data-export-label="">{$module.title}</td>
-                            <td class="value">{$module.version}</td>
+                            <td data-export-label="">{$module.code} - {$module.title} {if $module.version < $module.latestVersion} {/if}</td>
+                            {if $module.version < $module.latestVersion}
+                            <td class="version-outdated"><span>{$module.version}</span></td>
+                            {else}
+                            <td class="version-up-to-date"><span>{$module.version}</span></td>
+                            {/if}
+                            {if $module.latestVersion === '0'}
+                            <td class="unknown-version"><span>{intl l='Not found' d='healthstatus.bo.default'}</span></td>
+                            {else}
+                            <td class="latest"><span>{$module.latestVersion}</span></td>
+                            {/if}
                         </tr>
                         {/foreach}
                         </tbody>
@@ -60,6 +80,25 @@
                         </tbody>
                     </table>
                 </div>
+                {if $numberOfOverride > 0}
+                <button class="toggleButton" aria-expanded="false">{$numberOfOverride} {intl l='override(s) files have been detected' d='healthstatus.bo.default'}<i class="fas fa-chevron-down"></i></button>
+                <div class="health-check-accordion-panel hidden">
+                    <table class="health-check-table" role="presentation">
+                        <tbody>
+                        <tr>
+                            <th>Path</th>
+                            <th>File</th>
+                        </tr>
+                        {foreach $overrideFiles as $file}
+                        <tr>
+                            <td data-export-label="">{$file.path}</td>
+                            <td class="value">{$file.file}</td>
+                        </tr>
+                        {/foreach}
+                        </tbody>
+                    </table>
+                </div>
+                {/if}
                 <button class="toggleButton" aria-expanded="false">
                     HTTPS {if $httpsCheck == 'yes'}
                     {intl l="is enabled" d='healthstatus.bo.default'}
@@ -67,7 +106,7 @@
                     {intl l="is disabled" d='healthstatus.bo.default'}
                     {/if}
                     <div>
-                        <span class="type">{$httpsCheck.type}</span>
+                        <span class="type">{intl l=$httpsCheck.type d='healthstatus.bo.default'}</span>
                         <i class="fas fa-chevron-down"></i></div></button>
                 </button>
                 <div class="health-check-accordion-panel hidden">
@@ -285,11 +324,27 @@
         text-transform: capitalize;
     }
 
-    .status-bar {
-        padding: 10px;
-        color: #fff;
+    td span {
+        padding: 6px;
+        color: #FFFFFF;
+        border-radius: 2px;
     }
 
+    .version-outdated span{
+        background-color: #e14343;
+    }
+
+    .version-up-to-date span {
+        background-color: #6dd07f;
+    }
+
+    .latest span {
+        background-color: #6dd07f;
+    }
+
+    .unknown-version span {
+        background-color: #e14343;
+    }
 
 
 </style>
