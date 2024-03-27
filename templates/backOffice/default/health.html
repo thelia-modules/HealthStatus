@@ -4,7 +4,6 @@
 
 {block name='check-resource'}admin.module{/block}
 {block name='check-access'}view{/block}
-
 {block name='main-content'}
 
 <div class='general-block-decorator'>
@@ -203,7 +202,45 @@
             </div>
         </div>
     </div>
+
+    {loop type="admin" name="healthStatus"}
+    <form id="generateKeyForm" class="generateKeyForm">
+        <input type="hidden" id="adminID" name="adminID" value="{$ID}">
+        <a href="{$urlServer}">Récupérer vos informations du serveur à partir d'un lien.</a>
+        <a href="{$urlGeneral}">Récupérer vos informations sur vos modules à partir d'un lien.</a>
+        <button type="submit" class="btn btn-default">Generate Key</button>
+    </form>
+    {/loop}
+
+
+
 </div>
+
+<script>
+    document.querySelectorAll('.generateKeyForm').forEach(function(form) {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const adminID = form.querySelector('input[name="adminID"]').value;
+
+            // Envoyer une requête HTTP POST à votre serveur
+            fetch('/generate-key', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ adminID: adminID }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Generated Key:', data);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        });
+    });
+</script>
 
 
 <script>
@@ -349,6 +386,22 @@
     .unknown-version span {
         color: #FFFFFF;
         background-color: #e14343;
+    }
+
+    .generateKeyForm {
+        display: flex;
+        flex-direction: column;
+        margin-top: 20px;
+    }
+
+    .generateKeyForm a {
+        margin-bottom: 10px;
+    }
+
+
+    .generateKeyForm button {
+        margin-top: 10px;
+        width: 200px;
     }
 
 

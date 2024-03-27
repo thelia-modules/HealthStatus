@@ -29,8 +29,6 @@ use Symfony\Component\Routing\Annotation\Route;
 class ConfigController extends BaseAdminController
 {
 
-
-
     /**
      * @Route("/show", name="_show", methods="GET")
      */
@@ -68,6 +66,10 @@ class ConfigController extends BaseAdminController
         $checkOverrideFiles = $checkOverrideServices->getOverrides();
         $numberOfOverride = $checkOverrideServices->getNumberOfOverrides($checkOverrideFiles);
 
+        $urlServerInfo = $this->getRequest()->getSchemeAndHttpHost().$this->getRequest()->getBaseUrl()."/admin/healthstatus/server_info";
+        $urlGeneralInfo = $this->getRequest()->getSchemeAndHttpHost().$this->getRequest()->getBaseUrl()."/admin/healthstatus/info";
+
+        $keyGenerated = $this->getRequest()->getSession()->get('health_key');
         return
             $this->render('health', [
                 'theliaConfig' => $theliaConfig,
@@ -83,6 +85,8 @@ class ConfigController extends BaseAdminController
                 'performance' => $performance,
                 'overrideFiles' => $checkOverrideFiles,
                 'numberOfOverride' => $numberOfOverride,
+                'urlServer' => $urlServerInfo,
+                'urlGeneral' => $urlGeneralInfo
             ]
         );
     }

@@ -4,6 +4,11 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://symfony.com/schema/routing http://symfony.com/schema/routing/routing-1.0.xsd">
 
+
+    <route id="generate_key_route" path="/generate-key">
+        <default key="_controller">HealthStatus\Controller\HealthJsonController::generateKey</default>
+    </route>
+
     <!--
 
     if a /admin/module/healthstatus/ route is provided, a "Configuration" button will be displayed
