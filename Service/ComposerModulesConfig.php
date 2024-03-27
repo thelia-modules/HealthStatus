@@ -13,9 +13,10 @@ class ComposerModulesConfig
         )['require'];
         foreach ($composerModulesList as $key => $value) {
             if (strpos($key, 'thelia') !== false) {
+                $version = preg_replace('/[^0-9.]/', '', $value);
                 $composerModules[] = [
                     'code' => $key,
-                    'version' => $value,
+                    'version' => $version,
                 ];
             }
         }
@@ -27,3 +28,4 @@ class ComposerModulesConfig
         return count($composerModules);
     }
 }
+

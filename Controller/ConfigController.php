@@ -12,16 +12,78 @@
 
 namespace HealthStatus\Controller;
 
+use HealthStatus\Service\CheckOverridesConfig;
+use HealthStatus\Service\ComposerModulesConfig;
+use HealthStatus\Service\DatabaseConfig;
+use HealthStatus\Service\HttpsCheckConfig;
+use HealthStatus\Service\ModulesConfig;
+use HealthStatus\Service\PerformanceConfig;
+use HealthStatus\Service\PhpConfig;
+use HealthStatus\Service\TheliaConfig;
 use Thelia\Controller\Admin\BaseAdminController;
+use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * @Route("/admin/healthstatus", name="health")
+ */
 class ConfigController extends BaseAdminController
 {
-    public function setAction()
+
+
+
+    /**
+     * @Route("/show", name="_show", methods="GET")
+     */
+    public function index()
     {
-        return $this->render('module-configure', [
-            'module_code' => 'HealthStatus',
-        ]);
+        $phpConfigService = new PhpConfig();
+        $phpConfig = $phpConfigService->getPhpConfig();
+
+        $theliaConfig = new TheliaConfig();
+        $theliaConfig = $theliaConfig->getTheliaConfig();
+
+        $databaseConfig = new DatabaseConfig();
+        $databaseConfig = $databaseConfig->getDatabaseConfig();
+
+        $performance = new PerformanceConfig();
+        $performance = $performance->getPerformanceConfig();
+
+        $modulesService = new ModulesConfig();
+        $modulesList = $modulesService->getModules();
+        $activeModules = $modulesService->getActiveModules($modulesList);
+        $inactiveModules = $modulesService->getInactiveModules($modulesList);
+        $numberOfActiveModules = $modulesService->getNumberOfActiveModules($activeModules);
+        $numberOfInactiveModules = $modulesService->getNumberOfInactiveModules($inactiveModules);
+
+        $composerJsonPath = THELIA_ROOT.'/composer.json';
+        $composerModulesService = new ComposerModulesConfig();
+        $composerModules = $composerModulesService->getComposerModules($composerJsonPath);
+
+        $numberOfComposerModules = $composerModulesService->getNumberOfComposerModules($composerModules);
+
+        $httpsCheck = new HttpsCheckConfig();
+        $httpsCheck = $httpsCheck->getHttpsCheck();
+
+        $checkOverrideServices = new CheckOverridesConfig();
+        $checkOverrideFiles = $checkOverrideServices->getOverrides();
+        $numberOfOverride = $checkOverrideServices->getNumberOfOverrides($checkOverrideFiles);
+
+        return
+            $this->render('health', [
+                'theliaConfig' => $theliaConfig,
+                'phpConfig' => $phpConfig,
+                'databaseConfig' => $databaseConfig,
+                'activeModules' => $activeModules,
+                'inactiveModules' => $inactiveModules,
+                'composerModules' => $composerModules,
+                'numberOfActiveModules' => $numberOfActiveModules,
+                'numberOfInactiveModules' => $numberOfInactiveModules,
+                'numberOfComposerModules' => $numberOfComposerModules,
+                'httpsCheck' => $httpsCheck,
+                'performance' => $performance,
+                'overrideFiles' => $checkOverrideFiles,
+                'numberOfOverride' => $numberOfOverride,
+            ]
+        );
     }
-
-
 }

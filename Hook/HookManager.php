@@ -15,7 +15,7 @@ class HookManager extends BaseHook
             [
                 'id' => 'health_status_menu_tags',
                 'class' => '',
-                'url' => URL::getInstance()->absoluteUrl('/admin/health'),
+                'url' => URL::getInstance()->absoluteUrl('/admin/healthstatus/show'),
                 'title' => $this->trans('Health Status', [], HealthStatus::DOMAIN_NAME)
             ]
         );
