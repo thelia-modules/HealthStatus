@@ -2,75 +2,61 @@
 
 namespace HealthStatus\Service;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Thelia\Model\ModuleQuery;
 
 class ModulesConfig
 {
     public function getModules(): array
     {
-        // Initialisation des modules dans un tableau $modules.
+        $accessToken = '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';
+        $owner = 'thelia-modules';
+
         $modules = ModuleQuery::create()->find();
         $modulesList = [];
 
-        $multiCurl = curl_multi_init();
-        $curlHandles = [];
+        $cache = new FilesystemAdapter();
 
-        // Formatage des noms des modules pour les requêtes curl
         foreach ($modules as $module) {
             $moduleCode = $module->getCode();
-            $moduleCode = preg_replace('/([a-z])([A-Z])/', '$1-$2', $moduleCode);
-            $moduleCode = strtolower($moduleCode);
-            $moduleFormat = $moduleCode . '-module.json';
+            $repo = $moduleCode;
+            $cacheItem = $cache->getItem("module_$repo");
+            if ($cacheItem->isHit()) {
+                $latestVersion = $cacheItem->get();
+            } else {
+                $latestVersion = '0';
+                try {
+                    $client = new Client([
+                        'base_uri' => 'https://api.github.com/',
+                        'headers' => [
+                            'Authorization' => 'token ' . $accessToken,
+                            'Accept' => 'application/vnd.github.v3+json',
+                        ],
+                    ]);
+                    $response = $client->get("repos/$owner/$repo/tags");
+                    $tags = json_decode($response->getBody(), true);
 
-            $url = 'https://repo.packagist.org/p2/thelia/' . $moduleFormat;
-
-            // Initialisation de la requête curl
-            $curlHandle = curl_init($url);
-            // Configuration de la requête curl
-            curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curlHandle, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($curlHandle, CURLOPT_TIMEOUT, 10);
-
-            // Ajout de la requête curl à la requête multiple
-            curl_multi_add_handle($multiCurl, $curlHandle);
-            $curlHandles[] = $curlHandle;
-        }
-
-        // Exécution des requêtes curl
-        $active = null;
-        do {
-            $status = curl_multi_exec($multiCurl, $active);
-        } while ($status == CURLM_CALL_MULTI_PERFORM || $active);
-
-        // Récupération des résultats des requêtes curl
-        foreach ($curlHandles as $index => $curlHandle) {
-            $jsonContent = curl_multi_getcontent($curlHandle);
-            curl_multi_remove_handle($multiCurl, $curlHandle);
-            curl_close($curlHandle);
-
-            $latestVersion = '0'; // Message par défaut
-            if ($jsonContent !== false) {
-                $jsonArray = json_decode($jsonContent, true);
-                if (isset($jsonArray['packages']) && is_array($jsonArray['packages'])) {
-                    foreach ($jsonArray['packages'] as $moduleName => $moduleDetails) {
-                        $latestVersion = $moduleDetails[0]['version'];
-                        break;
+                    if (!empty($tags)) {
+                        $latestTag = $tags[0];
+                        $latestVersion = $latestTag['name'];
                     }
+
+                    $cacheItem->set($latestVersion);
+                    $cache->save($cacheItem);
+                } catch (GuzzleException $e) {
                 }
             }
 
-            // Ajout des informations des modules dans le tableau $modulesList
             $modulesList[] = [
-                'code' => $modules[$index]->getCode(),
-                'title' => $modules[$index]->getTitle(),
-                'active' => $modules[$index]->getActivate(),
-                'version' => $modules[$index]->getVersion(),
+                'code' => $module->getCode(),
+                'title' => $module->getTitle(),
+                'active' => $module->getActivate(),
+                'version' => $module->getVersion(),
                 'latestVersion' => $latestVersion,
             ];
         }
-
-        // Fermeture de la requête multiple
-        curl_multi_close($multiCurl);
 
         return $modulesList;
     }
