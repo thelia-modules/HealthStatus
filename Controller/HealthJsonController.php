@@ -12,46 +12,62 @@
 
 namespace HealthStatus\Controller;
 
-use HealthStatus\Model\HealthKeys;
-use HealthStatus\Model\HealthKeysQuery;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+use HealthStatus\HealthStatus;
 use HealthStatus\Service\CheckOverridesConfig;
 use HealthStatus\Service\ComposerModulesConfig;
 use HealthStatus\Service\DatabaseConfig;
 use HealthStatus\Service\HttpsCheckConfig;
+use HealthStatus\Service\JwtConfig;
 use HealthStatus\Service\ModulesConfig;
 use HealthStatus\Service\PerformanceConfig;
 use HealthStatus\Service\PhpConfig;
 use HealthStatus\Service\TheliaConfig;
-use Propel\Runtime\Exception\PropelException;
-use Thelia\Controller\Front\BaseFrontController;
-use Thelia\Core\HttpFoundation\JsonResponse;
-use Thelia\Core\HttpFoundation\Request;
+use Exception;
+use OpenApi\Controller\Front\BaseFrontOpenApiController;
+use Symfony\Component\HttpFoundation\Request;
 use Thelia\Core\HttpFoundation\Response;
-use Thelia\Controller\Admin\BaseAdminController;
 use Symfony\Component\Routing\Annotation\Route;
-use Thelia\Model\Admin;
+use Thelia\Model\AdminQuery;
 
 /**
- * @Route("/admin/healthstatus")
+ * @Route("/", name="health_json_server_info")
  */
-class HealthJsonController extends BaseFrontController
+class HealthJsonController extends BaseFrontOpenApiController
 {
+    private string $secretKey;
+
     /**
-     * @Route("/info", name="status_json_info", methods="GET")
+     * @throws \Exception
+     */
+    public function __construct()
+    {
+        $this->secretKey = HealthStatus::getSecretKey();
+    }
+
+    /**
+     * @Route("/info", name="health_info", methods="GET")
      */
     public function getInfoJson(Request $request)
     {
-
-        $healthKey = HealthKeysQuery::create()->findOne();
-        if ($healthKey === null) {
-            return new Response('Accès refusé. Clé secrète invalide.', 403);
-        } else
-            $healthKey = $healthKey->getSecretKey();
-
-        if ($healthKey === null ) {
-            return new Response('Accès refusé. Clé secrète invalide.', 403);
+        if (!preg_match('/Bearer\s(\S+)/', $_SERVER['HTTP_AUTHORIZATION'], $matches)) {
+            header('HTTP/1.0 400 Bad Request');
+            return new Response('Token not provided', 401);
         }
 
+        $token = $matches[1];
+        if (!$token) {
+            header('HTTP/1.0 400 Bad Request');
+            exit;
+        }
+
+        try {
+            $decoded = JWT::decode($token, new Key($this->secretKey, HealthStatus::getAlgorithm()));
+        } catch (\Exception $e) {
+            header('HTTP/1.0 401 Unauthorized');
+            return new Response('Invalid token', 401);
+        }
 
         $modulesService = new ModulesConfig();
         $modulesList = $modulesService->getModules();
@@ -85,24 +101,27 @@ class HealthJsonController extends BaseFrontController
             'numberOfOverride' => $numberOfOverride,
         ]);
 
-        return new Response($jsonData, 200, ['Content-Type' => 'application/json']);
+        return new Response ($jsonData, 200, ['Content-Type' => 'application/json']);
     }
 
     /**
-     * @Route("/server_info", name="health_json_server_info", methods="GET")
+     * @Route("/server_info", name="health_server_info", methods="GET")
      */
     public function getServerInfo(Request $request)
     {
 
-        $healthKey = HealthKeysQuery::create()->findOne();
-        if ($healthKey === null) {
-            return new Response('Accès refusé. Clé secrète invalide.', 403);
-        } else
-        $healthKey = $healthKey->getSecretKey();
-
-        if ($healthKey === null ) {
-            return new Response('Accès refusé. Clé secrète invalide.', 403);
+        if (! preg_match('/Bearer\s(\S+)/', $_SERVER['HTTP_AUTHORIZATION'], $matches)) {
+            header('HTTP/1.0 400 Bad Request');
+            return new Response('Token not provided', 401);
         }
+
+        $token = $matches[1];
+        if (! $token) {
+            header('HTTP/1.0 400 Bad Request');
+            exit;
+        }
+
+        JWT::decode($token, new Key($this->secretKey, HealthStatus::getAlgorithm()));
 
         $phpConfigService = new PhpConfig();
         $phpConfig = $phpConfigService->getPhpConfig();
@@ -127,37 +146,29 @@ class HealthJsonController extends BaseFrontController
     }
 
     /**
-     * @Route("/generate-key", name="generate_key", methods="GET")
-     * @throws PropelException
-     * @throws RandomException
+     * @Route("/generate-token", name="generate-token", methods={"POST"})
+     * @throws Exception
      */
-    public function generateKey(Request $request)
+    public function generateToken(Request $request, JwtConfig $jwtConfig): Response
     {
+        $email = $request->request->get('email');
+        $password = $request->request->get('password');
 
-       $adminId = $request->request->get('adminID');
-        if (null === $adminId) {
-            return new Response('Admin ID is required', 400, ['Content-Type' => 'application/json']);
+        if (null === $email || null === $password) {
+            throw new Exception('Email and password are required');
         }
 
-        $secretKey = bin2hex(random_bytes(32));
+        $admin = AdminQuery::create()
+            ->filterByEmail($email)
+            ->findOne();
 
-        $existingHealthKey = HealthKeysQuery::create()->findOneByAdminId($adminId);
-
-        if ($existingHealthKey) {
-            $existingHealthKey->setSecretKey($secretKey);
-            $existingHealthKey->setUpdatedAt(new \DateTime());
-            $existingHealthKey->save();
-        } else {
-            $healthKey = new HealthKeys();
-            $healthKey->setAdminId($adminId);
-            $healthKey->setSecretKey($secretKey);
-            $healthKey->setCreatedAt(new \DateTime());
-            $healthKey->setUpdatedAt(new \DateTime());
-            $healthKey->save();
+        if (null === $admin || !$admin->checkPassword($password)) {
+            throw new Exception('Invalid credentials');
         }
 
-        return new Response(json_encode(['secretKey' => $secretKey]), 200, ['Content-Type' => 'application/json']);
+        $token = $jwtConfig->generateToken();
+
+        return new Response($token);
     }
-
 
 }

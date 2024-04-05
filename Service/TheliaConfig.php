@@ -23,7 +23,7 @@ class TheliaConfig
             ],
             'langUser' => [
                 'label' => 'Language User',
-                'value' => substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2),
+                'value' => isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) : 'en',
             ],
             'timezone' => [
                 'label' => 'Timezone',

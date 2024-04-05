@@ -3,6 +3,7 @@
 namespace HealthStatus;
 
 use Propel\Runtime\Connection\ConnectionInterface;
+use Random\RandomException;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
 use Symfony\Component\Finder\Finder;
 use Thelia\Install\Database;
@@ -12,6 +13,33 @@ class HealthStatus extends BaseModule
 {
     /** @var string */
     const DOMAIN_NAME = 'healthstatus';
+
+    /**
+     * @throws RandomException
+     */
+    public static function getSecretKey(): ?string
+    {
+        if (self::getConfigValue('secret_key') === null) {
+            self::setConfigValue('secret_key', bin2hex(random_bytes(32)));
+        } else {
+            return self::getConfigValue('secret_key');
+        }
+
+        return self::getConfigValue('secret_key');
+    }
+
+    public static function getAlgorithm(): ?string
+    {
+        if (self::getConfigValue('algorithm') === null) {
+            self::setConfigValue('algorithm', 'HS256');
+        } else {
+            return self::getConfigValue('algorithm');
+        }
+
+        return self::getConfigValue('algorithm');
+    }
+
+
 
     /*
      * You may now override BaseModuleInterface methods, such as:

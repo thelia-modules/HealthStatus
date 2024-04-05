@@ -12,82 +12,62 @@
 
 namespace HealthStatus\Controller;
 
-use HealthStatus\Service\CheckOverridesConfig;
-use HealthStatus\Service\ComposerModulesConfig;
-use HealthStatus\Service\DatabaseConfig;
-use HealthStatus\Service\HttpsCheckConfig;
-use HealthStatus\Service\ModulesConfig;
-use HealthStatus\Service\PerformanceConfig;
-use HealthStatus\Service\PhpConfig;
-use HealthStatus\Service\TheliaConfig;
+use HealthStatus\Form\ConfigurationKey;
+use HealthStatus\HealthStatus;
+use HealthStatus\Service\JwtConfig;
+use Random\RandomException;
 use Thelia\Controller\Admin\BaseAdminController;
-use Symfony\Component\Routing\Annotation\Route;
+use Thelia\Core\Translation\Translator;
+use Thelia\Form\Exception\FormValidationException;
 
-/**
- * @Route("/admin/healthstatus", name="health")
- */
 class ConfigController extends BaseAdminController
 {
+    public function setAction()
+    {
+        $form = $this->createForm(ConfigurationKey::getName());
+
+        try {
+            $healthForm = $this->validateForm($form);
+            $formData = $healthForm->all();
+            $algorithm = $formData['algorithm'];
+
+            $algorithm = $algorithm->getData();
+
+
+            if ($algorithm !== null) {
+                HealthStatus::setConfigValue('algorithm', $algorithm);
+            }
+
+            $response = $this->redirectAction();
+
+        } catch (FormValidationException $e) {
+            $this->setupFormErrorContext(
+                Translator::getInstance()->trans('Error', []),
+                $e->getMessage(),
+                $form
+            );
+
+            return $this->generateSuccessRedirect($form);
+        }
+
+        return $response;
+
+
+    }
+
+    public function redirectAction()
+    {
+        return $this->generateRedirectFromRoute('admin.module.configure', [], ['module_code' => 'HealthStatus']);
+    }
 
     /**
-     * @Route("/show", name="_show", methods="GET")
+     * @throws RandomException
      */
-    public function index()
+    public function regenerateKey()
     {
-        $phpConfigService = new PhpConfig();
-        $phpConfig = $phpConfigService->getPhpConfig();
-
-        $theliaConfig = new TheliaConfig();
-        $theliaConfig = $theliaConfig->getTheliaConfig();
-
-        $databaseConfig = new DatabaseConfig();
-        $databaseConfig = $databaseConfig->getDatabaseConfig();
-
-        $performance = new PerformanceConfig();
-        $performance = $performance->getPerformanceConfig();
-
-        $modulesService = new ModulesConfig();
-        $modulesList = $modulesService->getModules();
-        $activeModules = $modulesService->getActiveModules($modulesList);
-        $inactiveModules = $modulesService->getInactiveModules($modulesList);
-        $numberOfActiveModules = $modulesService->getNumberOfActiveModules($activeModules);
-        $numberOfInactiveModules = $modulesService->getNumberOfInactiveModules($inactiveModules);
-
-        $composerJsonPath = THELIA_ROOT.'/composer.json';
-        $composerModulesService = new ComposerModulesConfig();
-        $composerModules = $composerModulesService->getComposerModules($composerJsonPath);
-
-        $numberOfComposerModules = $composerModulesService->getNumberOfComposerModules($composerModules);
-
-        $httpsCheck = new HttpsCheckConfig();
-        $httpsCheck = $httpsCheck->getHttpsCheck();
-
-        $checkOverrideServices = new CheckOverridesConfig();
-        $checkOverrideFiles = $checkOverrideServices->getOverrides();
-        $numberOfOverride = $checkOverrideServices->getNumberOfOverrides($checkOverrideFiles);
-
-        $urlServerInfo = $this->getRequest()->getSchemeAndHttpHost().$this->getRequest()->getBaseUrl()."/admin/healthstatus/server_info";
-        $urlGeneralInfo = $this->getRequest()->getSchemeAndHttpHost().$this->getRequest()->getBaseUrl()."/admin/healthstatus/info";
-
-        $keyGenerated = $this->getRequest()->getSession()->get('health_key');
-        return
-            $this->render('health', [
-                'theliaConfig' => $theliaConfig,
-                'phpConfig' => $phpConfig,
-                'databaseConfig' => $databaseConfig,
-                'activeModules' => $activeModules,
-                'inactiveModules' => $inactiveModules,
-                'composerModules' => $composerModules,
-                'numberOfActiveModules' => $numberOfActiveModules,
-                'numberOfInactiveModules' => $numberOfInactiveModules,
-                'numberOfComposerModules' => $numberOfComposerModules,
-                'httpsCheck' => $httpsCheck,
-                'performance' => $performance,
-                'overrideFiles' => $checkOverrideFiles,
-                'numberOfOverride' => $numberOfOverride,
-                'urlServer' => $urlServerInfo,
-                'urlGeneral' => $urlGeneralInfo
-            ]
-        );
+        HealthStatus::setConfigValue('secret_key', bin2hex(random_bytes(32)));
+        return $this->generateRedirectFromRoute('admin.module.configure', [], ['module_code' => 'HealthStatus']);
     }
+
+
 }

@@ -4,8 +4,20 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://thelia.net/schema/dic/config http://thelia.net/schema/dic/config/thelia-1.0.xsd">
     <hooks>
-      <hook id="health_status.hook.back" class="HealthStatus\Hook\HookManager">
-        <tag name="hook.event_listener" event="main.top-menu-tools" type="back" method="onMainTopMenuTools" />
-      </hook>
+        <hook id="health_status.hook.back" class="HealthStatus\Hook\HookManager">
+            <tag name="hook.event_listener" event="main.top-menu-tools" type="back" method="onMainTopMenuTools" />
+        </hook>
+
+        <hook id="health_status.configuration.hook" class="HealthStatus\Hook\ConfigHook" scope="request">
+            <tag name="hook.event_listener" event="module.configuration" type="back" method="onModuleConfiguration"/>
+        </hook>
+
     </hooks>
+    <forms>
+        <form name="healthstatus_configuration" class="HealthStatus\Form\ConfigurationKey" />
+    </forms>
+
+
 </config>
+
+

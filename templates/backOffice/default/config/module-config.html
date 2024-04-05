@@ -1,0 +1,24 @@
+<div class="general-block-decorator">
+    <div class="row">
+        <div class="col-md-12 title title-without-tabs">
+            {intl l='Configure your key to get your data' }
+        </div>
+        <div class="col-md-12" style="margin-top: 15px">
+            <form method="POST" action="{url path="/admin/module/healthstatus/regenerate"}">
+            <button type="submit" class="form-submit-button btn btn-default">Regenerate key</button>
+            </form>
+            {form name="healthstatus_configuration"}
+            <form method="POST" action="{url path="/admin/module/healthstatus/config"}" style="margin-top: 15px">
+            {form_hidden_fields form=$form}
+            {form_field form=$form field="success_url"}
+            <input type="hidden" name="{$name}" value="{url path='/admin/module/HealthStatus'}">
+            {/form_field}
+            {render_form_field form=$form field="algorithm"}
+            <span class="input-group-btn">
+                <button type="submit" class="form-submit-button btn btn-default">Save</button>
+            </span>
+            {/form}
+        </div>
+    </div>
+</div>
+
