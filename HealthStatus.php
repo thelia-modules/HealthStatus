@@ -24,7 +24,6 @@ class HealthStatus extends BaseModule
         } else {
             return self::getConfigValue('secret_key');
         }
-
         return self::getConfigValue('secret_key');
     }
 
@@ -35,10 +34,19 @@ class HealthStatus extends BaseModule
         } else {
             return self::getConfigValue('algorithm');
         }
-
         return self::getConfigValue('algorithm');
     }
 
+
+    public static function getExpirationTime(): ?int
+    {
+        if (self::getConfigValue('expiration_time') === null) {
+            self::setConfigValue('expiration_time', time() + 900);
+        } else {
+            return self::getConfigValue('expiration_time');
+        }
+        return self::getConfigValue('expiration_time');
+    }
 
 
     /*

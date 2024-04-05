@@ -20,14 +20,19 @@ class JwtConfig
 
     public function generateToken(): string
     {
+        $expirationTime = HealthStatus::getExpirationTime();
+
+        if ($expirationTime <= time()) {
+            $expirationTime = time() + 900;
+            HealthStatus::setConfigValue('expiration_time', $expirationTime);
+        }
+
         $token = array(
             "iss" => ConfigQuery::read('url_site'),
-            "exp" => time() + 3600,
+            "exp" => $expirationTime
         );
 
         $alg = HealthStatus::getAlgorithm();
-        var_dump($alg);
-        var_dump($this->secretKey);
 
         return JWT::encode($token, $this->secretKey, $alg);
     }

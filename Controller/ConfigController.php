@@ -15,11 +15,13 @@ namespace HealthStatus\Controller;
 use HealthStatus\Form\ConfigurationKey;
 use HealthStatus\HealthStatus;
 use HealthStatus\Service\JwtConfig;
-use Random\RandomException;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\Translation\Translator;
 use Thelia\Form\Exception\FormValidationException;
-
+use Symfony\Component\Routing\Annotation\Route;
+/**
+ * @Route("/admin/module/healthstatus", name="health_config")
+ */
 class ConfigController extends BaseAdminController
 {
     public function setAction()
@@ -30,9 +32,14 @@ class ConfigController extends BaseAdminController
             $healthForm = $this->validateForm($form);
             $formData = $healthForm->all();
             $algorithm = $formData['algorithm'];
-
+            $expirationTimeForm = $formData['expiration_time'];
+            $expirationTimeMin = $expirationTimeForm->getData();
+            $expirationTimeSec = $expirationTimeMin * 60;
             $algorithm = $algorithm->getData();
 
+            if ($expirationTimeSec !== null) {
+                HealthStatus::setConfigValue('expiration_time', time() + $expirationTimeSec);
+            }
 
             if ($algorithm !== null) {
                 HealthStatus::setConfigValue('algorithm', $algorithm);
@@ -52,7 +59,6 @@ class ConfigController extends BaseAdminController
 
         return $response;
 
-
     }
 
     public function redirectAction()
@@ -68,6 +74,5 @@ class ConfigController extends BaseAdminController
         HealthStatus::setConfigValue('secret_key', bin2hex(random_bytes(32)));
         return $this->generateRedirectFromRoute('admin.module.configure', [], ['module_code' => 'HealthStatus']);
     }
-
 
 }

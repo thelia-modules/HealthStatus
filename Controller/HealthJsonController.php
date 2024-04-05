@@ -14,6 +14,8 @@ namespace HealthStatus\Controller;
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use HealthStatus\HealthStatus;
 use HealthStatus\Service\CheckOverridesConfig;
 use HealthStatus\Service\ComposerModulesConfig;
@@ -30,6 +32,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Thelia\Core\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Model\AdminQuery;
+use Thelia\Model\ModuleQuery;
 
 /**
  * @Route("/", name="health_json_server_info")
@@ -121,7 +124,12 @@ class HealthJsonController extends BaseFrontOpenApiController
             exit;
         }
 
-        JWT::decode($token, new Key($this->secretKey, HealthStatus::getAlgorithm()));
+        try {
+            $decoded = JWT::decode($token, new Key($this->secretKey, HealthStatus::getAlgorithm()));
+        } catch (\Exception $e) {
+            header('HTTP/1.0 401 Unauthorized');
+            return new Response('Invalid token', 401);
+        }
 
         $phpConfigService = new PhpConfig();
         $phpConfig = $phpConfigService->getPhpConfig();
@@ -170,5 +178,59 @@ class HealthJsonController extends BaseFrontOpenApiController
 
         return new Response($token);
     }
+
+
+    /**
+     * @Route("/repo-info", name="get-info-repo", methods={"GET"})
+     */
+    public function fetchGitRepo()
+    {
+        $accessToken = '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';
+        $owner = 'thelia-modules';
+
+        $modules = ModuleQuery::create()->find();
+
+        $modulesCode = [];
+
+        foreach ($modules as $module) {
+            $modulesCode[] = $module->getCode();
+        }
+
+        $client = new Client([
+            'base_uri' => 'https://api.github.com/',
+            'headers' => [
+                'Authorization' => 'token ' . $accessToken,
+                'Accept' => 'application/vnd.github.v3+json',
+            ],
+        ]);
+
+        $latestTags = [];
+
+        foreach ($modulesCode as $moduleCode) {
+            $repo = $moduleCode;
+
+            try {
+                $response = $client->get("repos/$owner/$repo/tags");
+                $tags = json_decode($response->getBody(), true);
+
+                if (!empty($tags)) {
+                    $latestTag = $tags[0];
+                    $latestTags[] = [
+                        'module' => $moduleCode,
+                        'tag' => $latestTag['name'],
+                        'commit' => $latestTag['commit']['sha'],
+                    ];
+                } else {
+                    echo "No tags found for module: $moduleCode\n";
+                }
+            } catch (GuzzleException $e) {
+                echo "An error occurred while fetching tags for module: $moduleCode - " . $e->getMessage() . "\n";
+            }
+        }
+        $latestTagsJson = json_encode($latestTags);
+
+        return new Response($latestTagsJson, 200, ['Content-Type' => 'application/json']);
+    }
+
 
 }
