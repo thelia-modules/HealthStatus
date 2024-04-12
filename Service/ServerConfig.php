@@ -2,6 +2,8 @@
 
 namespace HealthStatus\Service;
 
+use HealthStatus\HealthStatus;
+
 class PhpConfig
 {
     public function getPhpConfig(): array
@@ -11,41 +13,64 @@ class PhpConfig
                 'label' => 'Web Server',
                 'value' => $_SERVER['SERVER_SOFTWARE'],
             ],
-
             'phpVersion' => [
-                'label' => 'PHP Version',
+                'label' => 'PHP Server',
+                'value' => PHP_VERSION,
+            ],
+            'phpCli' => [
+                'label' => 'PHP CLI',
                 'value' => phpversion(),
             ],
-
+            'composerVersion' => [
+                'label' => 'Composer Version',
+                'value' => HealthStatus::getComposerVersion(),
+            ],
+            'nodeVersion' => [
+                'label' => 'Node Version',
+                'value' => HealthStatus::getNodeVersion(),
+            ],
             'memoryLimit' => [
                 'label' => 'Memory Limit',
+                'valueConvert' => $this->memoryToBytes(ini_get('memory_limit')),
                 'value' => ini_get('memory_limit'),
+                'recommended' => 256 * 1024,
+                'type' => 'Performance',
             ],
-
             'maxPostSize' => [
                 'label' => 'Max Post Size',
+                'valueConvert' => $this->memoryToBytes(ini_get('post_max_size')),
                 'value' => ini_get('post_max_size'),
+                'recommended' => 20 * 1024 ,
+                'type' => 'Performance',
             ],
-
             'maxUploadSize' => [
                 'label' => 'Max Upload Size',
                 'value' => ini_get('upload_max_filesize'),
             ],
-
             'safeMode' => [
                 'label' => 'Safe Mode',
                 'value' => ini_get('safe_mode') ? 'on' : 'off',
             ],
-
             'curlVersion' => [
                 'label' => 'Curl Version',
                 'value' => function_exists('curl_version') ? curl_version()['version'] : 'off',
             ],
-
             'currentTime' => [
                 'label' => 'Current Time',
                 'value' => date('Y-m-d H:i:s'),
             ],
         ];
     }
+
+    function memoryToBytes($value): int
+    {
+        $unit = strtolower(substr($value, -1, 1));
+        $value = (int)$value;
+        switch($unit) {
+            case 'm':
+                $value *= 1024;
+        }
+        return $value;
+    }
+
 }
