@@ -11,18 +11,25 @@
  */
 
 namespace HealthStatus\Controller;
-
-use HealthStatus\Model\HealthKeysQuery;
+use Composer\EventDispatcher\EventDispatcher;
+use HealthStatus\HealthStatus;
 use HealthStatus\Service\CheckOverridesConfig;
 use HealthStatus\Service\ComposerModulesConfig;
 use HealthStatus\Service\DatabaseConfig;
+use HealthStatus\Service\ExtensionsConfig;
 use HealthStatus\Service\HttpsCheckConfig;
 use HealthStatus\Service\ModulesConfig;
+use HealthStatus\Service\OrderConfig;
 use HealthStatus\Service\PerformanceConfig;
-use HealthStatus\Service\PhpConfig;
+use HealthStatus\Service\ServerConfig;
 use HealthStatus\Service\TheliaConfig;
+use Propel\Runtime\Exception\PropelException;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\EventDispatcher\GenericEvent;
+use Thelia\Action\Order;
 use Thelia\Controller\Admin\BaseAdminController;
 use Symfony\Component\Routing\Annotation\Route;
+use Thelia\Core\Event\TheliaEvents;
 use Thelia\Core\HttpFoundation\Request;
 
 /**
@@ -30,14 +37,29 @@ use Thelia\Core\HttpFoundation\Request;
  */
 class HealthController extends BaseAdminController
 {
+    protected mixed $subject;
+
+    public function __construct()
+    {
+        $this->subject = HealthStatus::MODULE_SUBJECT;
+    }
 
     /**
-     * @Route("/show", name="_show", methods="GET")
+     * @Route("/show", name="_show_info", methods="GET")
+     * @throws PropelException
      */
-    public function index()
+    public function index(EventDispatcherInterface $eventDispatcher)
     {
-        $phpConfigService = new PhpConfig();
-        $phpConfig = $phpConfigService->getPhpConfig();
+        $subject = $this->subject;
+        $event = new GenericEvent($subject);
+        $eventDispatcher->dispatch($event,'module.config');
+        $modulesConfigCheck = $event->getArguments();
+
+
+        $ServerConfig = new ServerConfig();
+        $phpConfig = $ServerConfig->getPhpConfig();
+        $checkAdminRoute = $ServerConfig->checkRouteAdmin();
+        $checkMailNotification = $ServerConfig->checkNotificationsMail();
 
         $theliaConfig = new TheliaConfig();
         $theliaConfig = $theliaConfig->getTheliaConfig();
@@ -54,6 +76,7 @@ class HealthController extends BaseAdminController
         $inactiveModules = $modulesService->getInactiveModules($modulesList);
         $numberOfActiveModules = $modulesService->getNumberOfActiveModules($activeModules);
         $numberOfInactiveModules = $modulesService->getNumberOfInactiveModules($inactiveModules);
+        $mailCatcherCheck = $modulesService->checkMailCatcherStatus();
 
         $composerJsonPath = THELIA_ROOT.'/composer.json';
         $composerModulesService = new ComposerModulesConfig();
@@ -67,6 +90,19 @@ class HealthController extends BaseAdminController
         $checkOverrideServices = new CheckOverridesConfig();
         $checkOverrideFiles = $checkOverrideServices->getOverrides();
         $numberOfOverride = $checkOverrideServices->getNumberOfOverrides($checkOverrideFiles);
+
+        $extensions = new ExtensionsConfig();
+        $extensions = $extensions->getExtensionsConfig();
+        $extensions = $extensions['extensions'];
+
+        $order = new OrderConfig();
+        $lastOrder = $order->getLastOrder();
+        $lastOrderValue = $lastOrder['lastOrderDate'];
+        $lastOrderPaid = $order->getLastPaidOrder();
+        $lastOrderPaidDate = $lastOrderPaid['lastPaidOrderDate'];
+        $lastOrderPaidModule = $lastOrderPaid['lastPaidPaymentModule'];
+        $lastProductAdded = $order->getLastProductAdded();
+        $lastProductAddedDate = $lastProductAdded['lastProductAddedDate'];
 
         return
             $this->render('health', [
@@ -83,6 +119,15 @@ class HealthController extends BaseAdminController
                 'performance' => $performance,
                 'overrideFiles' => $checkOverrideFiles,
                 'numberOfOverride' => $numberOfOverride,
+                'extensions' => $extensions,
+                'lastOrder' => $lastOrderValue,
+                'lastOrderPaid' => $lastOrderPaidDate,
+                'lastPaidPaymentModule' => $lastOrderPaidModule,
+                'lastProductAdded' => $lastProductAddedDate,
+                'mailCatcherCheck' => $mailCatcherCheck,
+                'checkAdminRoute' => $checkAdminRoute,
+                'moduleConfigCheck' => $modulesConfigCheck,
+                'checkMailNotification' => $checkMailNotification
             ]
         );
     }

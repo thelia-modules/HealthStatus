@@ -14,6 +14,19 @@ class HealthStatus extends BaseModule
     /** @var string */
     const DOMAIN_NAME = 'healthstatus';
 
+    const MODULE_SUBJECT = 'HealthStatus';
+
+    public static function getComposerVersion(): string
+    {
+        return explode(' ', shell_exec('composer --version'))[2];
+    }
+
+    public static function getNodeVersion(): string
+    {
+        return shell_exec('node -v');
+    }
+
+
     /**
      * @throws RandomException
      */

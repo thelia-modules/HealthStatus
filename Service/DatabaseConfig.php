@@ -22,7 +22,7 @@ class DatabaseConfig
         $maxAllowedPacket = $mysqlCon->query("SHOW VARIABLES LIKE 'max_allowed_packet'")->fetchColumn(1);
         $maxConnections = $mysqlCon->query("SHOW VARIABLES LIKE 'max_connections'")->fetchColumn(1);
 
-        $databaseConfig = [
+        return [
             'mysql' => [
                 'label' => 'Server Version',
                 'value' => $mySQLVersion,
@@ -64,7 +64,5 @@ class DatabaseConfig
                 'value' => $maxConnections,
             ],
         ];
-
-        return $databaseConfig;
     }
 }

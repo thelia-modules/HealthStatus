@@ -9,11 +9,6 @@
         <default key="_controller">HealthStatus\Controller\ConfigController::setAction</default>
     </route>
 
-    <route id="healthstatus.regenerate" path="/admin/module/healthstatus/regenerate" methods="post">
-        <default key="_controller">HealthStatus\Controller\ConfigController::regenerateKey</default>
-    </route>
-
-
     <!--
 
     if a /admin/module/healthstatus/ route is provided, a "Configuration" button will be displayed

@@ -14,30 +14,38 @@ namespace HealthStatus\Controller;
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
 use HealthStatus\HealthStatus;
 use HealthStatus\Service\CheckOverridesConfig;
 use HealthStatus\Service\ComposerModulesConfig;
 use HealthStatus\Service\DatabaseConfig;
+use HealthStatus\Service\ExtensionsConfig;
 use HealthStatus\Service\HttpsCheckConfig;
 use HealthStatus\Service\JwtConfig;
 use HealthStatus\Service\ModulesConfig;
+use HealthStatus\Service\OrderConfig;
 use HealthStatus\Service\PerformanceConfig;
-use HealthStatus\Service\PhpConfig;
+use HealthStatus\Service\ServerConfig;
 use HealthStatus\Service\TheliaConfig;
 use Exception;
-use OpenApi\Controller\Front\BaseFrontOpenApiController;
+use OpenApi\Attributes\Get;
+use OpenApi\Attributes\Parameter;
+use OpenApi\Attributes\Post;
+use OpenApi\Attributes\Response;
+use OpenApi\Attributes\Schema;
+use Propel\Generator\Model\Diff\DatabaseDiff;
+use Propel\Runtime\Exception\PropelException;
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Request;
-use Thelia\Core\HttpFoundation\Response;
+use Thelia\Controller\Front\BaseFrontController;
+use Thelia\Core\HttpFoundation\Response as TheliaResponse ;
 use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Model\AdminQuery;
-use Thelia\Model\ModuleQuery;
+use OpenApi\Annotations as OA;
 
 /**
- * @Route("/", name="health_json_server_info")
+ * @Route("/healthstatus/api", name="health_json_server_info")
  */
-class HealthJsonController extends BaseFrontOpenApiController
+class HealthJsonController extends BaseFrontController
 {
     private string $secretKey;
 
@@ -49,14 +57,32 @@ class HealthJsonController extends BaseFrontOpenApiController
         $this->secretKey = HealthStatus::getSecretKey();
     }
 
+    #[Route('/server-site-info', name: 'health_server_site_info', methods: ['GET'])]
     /**
-     * @Route("/info", name="health_info", methods="GET")
+     * @OA\Get(
+     *     path="/server-site-info",
+     *     summary="Get server site information",
+     *     tags={"HealthStatus"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success"
+     *     ),
+     *     security={
+     *         {"BearerAuth": {}}
+     *     }
+     * )
+     * @OA\SecurityScheme(
+     *      type="http",
+     *      scheme="bearer",
+     *      bearerFormat="JWT",
+     *      securityScheme="BearerAuth"
+     * )
      */
-    public function getInfoJson(Request $request)
+    public function getServerSiteInfo(Request $request)
     {
         if (!preg_match('/Bearer\s(\S+)/', $_SERVER['HTTP_AUTHORIZATION'], $matches)) {
             header('HTTP/1.0 400 Bad Request');
-            return new Response('Token not provided', 401);
+            return new TheliaResponse('Token not provided', 401);
         }
 
         $token = $matches[1];
@@ -69,7 +95,81 @@ class HealthJsonController extends BaseFrontOpenApiController
             $decoded = JWT::decode($token, new Key($this->secretKey, HealthStatus::getAlgorithm()));
         } catch (\Exception $e) {
             header('HTTP/1.0 401 Unauthorized');
-            return new Response('Invalid token', 401);
+            return new TheliaResponse('Invalid token', 401);
+        }
+
+        $ServerConfig = new ServerConfig();
+        $theliaConfig = new TheliaConfig();
+        $databaseConfig = new DatabaseConfig();
+        $performance = new PerformanceConfig();
+        $modulesService = new ModulesConfig();
+        $httpsCheck = new HttpsCheckConfig();
+        $checkOverrideServices = new CheckOverridesConfig();
+        $extensions = new ExtensionsConfig();
+        $extensions = $extensions->getExtensionsConfig();
+        $extensions = $extensions['extensions'];
+        $phpConfig = $ServerConfig->getPhpConfig();
+        $theliaConfig = $theliaConfig->getTheliaConfig();
+        $checkAdminRoute = $ServerConfig->checkRouteAdmin();
+        $checkMailNotification = $ServerConfig->checkNotificationsMail();
+        $databaseConfig = $databaseConfig->getDatabaseConfig();
+        $performance = $performance->getPerformanceConfig();
+        $httpsCheck = $httpsCheck->getHttpsCheck();
+        $mailCatcherCheck = $modulesService->checkMailCatcherStatus();
+        $checkOverrideFiles = $checkOverrideServices->getOverrides();
+        $numberOfOverride = $checkOverrideServices->getNumberOfOverrides($checkOverrideFiles);
+
+        $jsonData = json_encode([
+            'php' => $phpConfig,
+            'thelia' => $theliaConfig,
+            'database' => $databaseConfig,
+            'performance' => $performance,
+            'mailCatcher' => $mailCatcherCheck,
+            'checkOverrideFiles' => $checkOverrideFiles,
+            'numberOfOverride' => $numberOfOverride,
+            'extensions' => $extensions,
+            'checkAdminRoute' => $checkAdminRoute,
+            'checkMailNotification' => $checkMailNotification,
+            'httpsCheck' => $httpsCheck
+        ]);
+
+        return new TheliaResponse ($jsonData, 200, ['Content-Type' => 'application/json']);
+    }
+
+
+    #[Route('/modules-info', name: 'health_modules_info', methods: ['GET'])]
+    /**
+     * @OA\Get(
+     *     path="/modules-info",
+     *     summary="Get modules information",
+     *     tags={"HealthStatus"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success"
+     *     ),
+     *     security={
+     *         {"BearerAuth": {}}
+     *     }
+     * )
+     */
+    public function getModulesInfo(Request $request)
+    {
+        if (!preg_match('/Bearer\s(\S+)/', $_SERVER['HTTP_AUTHORIZATION'], $matches)) {
+            header('HTTP/1.0 400 Bad Request');
+            return new TheliaResponse('Token not provided', 401);
+        }
+
+        $token = $matches[1];
+        if (!$token) {
+            header('HTTP/1.0 400 Bad Request');
+            exit;
+        }
+
+        try {
+            $decoded = JWT::decode($token, new Key($this->secretKey, HealthStatus::getAlgorithm()));
+        } catch (\Exception $e) {
+            header('HTTP/1.0 401 Unauthorized');
+            return new TheliaResponse('Invalid token', 401);
         }
 
         $modulesService = new ModulesConfig();
@@ -83,43 +183,41 @@ class HealthJsonController extends BaseFrontOpenApiController
         $composerModulesService = new ComposerModulesConfig();
         $composerModules = $composerModulesService->getComposerModules($composerJsonPath);
 
-        $numberOfComposerModules = $composerModulesService->getNumberOfComposerModules($composerModules);
-
-        $httpsCheck = new HttpsCheckConfig();
-        $httpsCheck = $httpsCheck->getHttpsCheck();
-
-        $checkOverrideServices = new CheckOverridesConfig();
-        $checkOverrideFiles = $checkOverrideServices->getOverrides();
-        $numberOfOverride = $checkOverrideServices->getNumberOfOverrides($checkOverrideFiles);
-
         $jsonData = json_encode([
             'activeModules' => $activeModules,
             'inactiveModules' => $inactiveModules,
-            'composerModules' => $composerModules,
             'numberOfActiveModules' => $numberOfActiveModules,
             'numberOfInactiveModules' => $numberOfInactiveModules,
-            'numberOfComposerModules' => $numberOfComposerModules,
-            'httpsCheck' => $httpsCheck,
-            'overrideFiles' => $checkOverrideFiles,
-            'numberOfOverride' => $numberOfOverride,
+            'composerModules' => $composerModules
         ]);
 
-        return new Response ($jsonData, 200, ['Content-Type' => 'application/json']);
+        return new TheliaResponse ($jsonData, 200, ['Content-Type' => 'application/json']);
     }
 
+    #[Route('/shop-info', name: 'health_shop_info', methods: ['GET'])]
     /**
-     * @Route("/server_info", name="health_server_info", methods="GET")
-     */
-    public function getServerInfo(Request $request)
+     * @OA\Get(
+     *     path="/shop-info",
+     *     summary="Get shop information",
+     *     tags={"HealthStatus"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success"
+     *     ),
+     *     security={
+     *         {"BearerAuth": {}}
+     *     }
+     * )
+     * */
+    public function getShopInfo(Request $request)
     {
-
-        if (! preg_match('/Bearer\s(\S+)/', $_SERVER['HTTP_AUTHORIZATION'], $matches)) {
+        if (!preg_match('/Bearer\s(\S+)/', $_SERVER['HTTP_AUTHORIZATION'], $matches)) {
             header('HTTP/1.0 400 Bad Request');
-            return new Response('Token not provided', 401);
+            return new TheliaResponse('Token not provided', 401);
         }
 
         $token = $matches[1];
-        if (! $token) {
+        if (!$token) {
             header('HTTP/1.0 400 Bad Request');
             exit;
         }
@@ -128,36 +226,56 @@ class HealthJsonController extends BaseFrontOpenApiController
             $decoded = JWT::decode($token, new Key($this->secretKey, HealthStatus::getAlgorithm()));
         } catch (\Exception $e) {
             header('HTTP/1.0 401 Unauthorized');
-            return new Response('Invalid token', 401);
+            return new TheliaResponse('Invalid token', 401);
         }
 
-        $phpConfigService = new PhpConfig();
-        $phpConfig = $phpConfigService->getPhpConfig();
-
-        $theliaConfig = new TheliaConfig();
-        $theliaConfig = $theliaConfig->getTheliaConfig();
-
-        $databaseConfig = new DatabaseConfig();
-        $databaseConfig = $databaseConfig->getDatabaseConfig();
-
-        $performance = new PerformanceConfig();
-        $performance = $performance->getPerformanceConfig();
+        $order = new OrderConfig();
+        $lastOrder = $order->getLastOrder();
+        $lastOrderValue = $lastOrder['lastOrderDate'];
+        $lastOrderPaid = $order->getLastPaidOrder();
+        $lastOrderPaidDate = $lastOrderPaid['lastPaidOrderDate'];
+        $lastOrderPaidModule = $lastOrderPaid['lastPaidPaymentModule'];
+        $lastProductAdded = $order->getLastProductAdded();
+        $lastProductAddedDate = $lastProductAdded['lastProductAddedDate'];
 
         $jsonData = json_encode([
-            'theliaConfig' => $theliaConfig,
-            'phpConfig' => $phpConfig,
-            'databaseConfig' => $databaseConfig,
-            'performance' => $performance,
+            'lastOrder' => $lastOrderValue,
+            'lastOrderPaid' => $lastOrderPaidDate,
+            'lastPaidPaymentModule' => $lastOrderPaidModule,
+            'lastProductAdded' => $lastProductAddedDate
         ]);
 
-        return new Response($jsonData, 200, ['Content-Type' => 'application/json']);
+        return new TheliaResponse ($jsonData, 200, ['Content-Type' => 'application/json']);
+
     }
 
+
     /**
-     * @Route("/generate-token", name="generate-token", methods={"POST"})
      * @throws Exception
      */
-    public function generateToken(Request $request, JwtConfig $jwtConfig): Response
+    #[Route('/generate-token', name: 'health_generate_token', methods: ['POST'])]
+    /**
+     * @OA\Post(
+     *     path="/generate-token",
+     *     summary="Generate a token",
+     *     tags={"HealthStatus"},
+     *     @OA\RequestBody(
+     *         description="Generate token request body",
+     *         required=true,
+     *         @OA\JsonContent(
+     *             type="object",
+     *             required={"email", "password"},
+     *             @OA\Property(property="email", type="string", format="email", example="user@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="yourpassword")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success"
+     *     )
+     * )
+     */
+    public function generateToken(Request $request, JwtConfig $jwtConfig): TheliaResponse
     {
         $email = $request->request->get('email');
         $password = $request->request->get('password');
@@ -176,61 +294,6 @@ class HealthJsonController extends BaseFrontOpenApiController
 
         $token = $jwtConfig->generateToken();
 
-        return new Response($token);
+        return new TheliaResponse($token);
     }
-
-
-    /**
-     * @Route("/repo-info", name="get-info-repo", methods={"GET"})
-     */
-    public function fetchGitRepo()
-    {
-        $accessToken = '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';
-        $owner = 'thelia-modules';
-
-        $modules = ModuleQuery::create()->find();
-
-        $modulesCode = [];
-
-        foreach ($modules as $module) {
-            $modulesCode[] = $module->getCode();
-        }
-
-        $client = new Client([
-            'base_uri' => 'https://api.github.com/',
-            'headers' => [
-                'Authorization' => 'token ' . $accessToken,
-                'Accept' => 'application/vnd.github.v3+json',
-            ],
-        ]);
-
-        $latestTags = [];
-
-        foreach ($modulesCode as $moduleCode) {
-            $repo = $moduleCode;
-
-            try {
-                $response = $client->get("repos/$owner/$repo/tags");
-                $tags = json_decode($response->getBody(), true);
-
-                if (!empty($tags)) {
-                    $latestTag = $tags[0];
-                    $latestTags[] = [
-                        'module' => $moduleCode,
-                        'tag' => $latestTag['name'],
-                        'commit' => $latestTag['commit']['sha'],
-                    ];
-                } else {
-                    echo "No tags found for module: $moduleCode\n";
-                }
-            } catch (GuzzleException $e) {
-                echo "An error occurred while fetching tags for module: $moduleCode - " . $e->getMessage() . "\n";
-            }
-        }
-        $latestTagsJson = json_encode($latestTags);
-
-        return new Response($latestTagsJson, 200, ['Content-Type' => 'application/json']);
-    }
-
-
 }

@@ -1,43 +1,82 @@
-# HealthStatus
+# Health Status
 
-## 1. Retrouvez sur une page l'état de santé de votre Thelia
+Find out information about the health of your Thelia installation.
 
-- Proposer de partager des infos anonymes avec OpenStudio
-    - version thelia
-    - version modules
-    - liste des modules et état d'activité
-    - check les overrides
-    - compatibles tout mod
-    - ????
+## Installation
 
-## 2. Spécifications
+---
+### Manually
 
-L'objectif de ce module est d'offrir aux commerçants une vision synthétique de l'état de leur Thelia,
-à la manière de WordPress (cf. https://fr.wordpress.org/support/article/site-health-screen).
+* Copy the module into ```<thelia_root>/local/modules/``` directory and be sure that the name of the module is HealthStatus.
+* Activate it in your thelia administration panel
 
-Le module utilise les données suivantes pour établir des diagnostics :
+### Composer
 
-- Le nom du module
-- Sa version courante
-- Si le module est activé ou non
-- S'il a été installé par composer ou manuellement (présence dans le `composer.json`)
-- S'il est surchargé (overriden) (examiner la section PSR-4 pour contrôler qu'un module est surchargé)
-- Si des portions de Thelia sont overrident (même principe)
-- Si un README figure dans le répertoire de base d'un override
+Add it in your main thelia composer.json file
 
-## Diagnostics réalisé&s par le module
+```bash
+composer require thelia/health-status-module:~1.0
+```
+
+## Usage
+
+---
+Once activated, you can access the health status page by going to the following URL: ```/admin/module/HealthStatus/show```
+The module works on a system of event. 
+It sends a GenericEvent with the name "module.config", all the modules can listen to this event and add their own health checks.
+
+## Extending the module
+
+---
+
+You can add your own health checks by listening to the "module.config" event.
+You have to create a new EventListener on the module you want to add the health check to. 
+Don't forget to add the tag "kernel.event_listener" with an event name in the services.xml file.
+
+Here is an example of a an EventListener that listens to the "module.config" event.
+
+```php
+
+namespace MyModule\EventListener;
+
+use Symfony\Component\EventDispatcher\GenericEvent;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
+class MyModuleHealthCheckListener implements EventSubscriberInterface
+{
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            'module.config' => [
+                'onModuleConfig', 128
+                ],
+        ];
+    }
+    
+    public function onModuleConfig(GenericEvent $event): void
+    {
+        $subject = $event->getSubject();
+
+        if ($subject !== "HealthStatus") {
+            throw new \RuntimeException('Event subject does not match expected value');
+        }
+           // Add your code here, for example check if a configuration is set
+    }
+}
+```
+
+> [!CAUTION]
+> If you are running a 2.4 version of Thelia or lower, you have to add the following code to the services.xml to make the EventListener work.
+
+```xml
+<service id="mymodule.config.listener" class="MyModule\EventListener\ConfigListener">
+    <tag name="kernel.event_listener" event="module.config" method="onModuleConfig"/>
+</service>
+```
 
 
 
-### Données envoyées à thelia.net
 
-Si le client a accepté de le faire, thelia va remonter des information sur thelia.net et/ou sur une instance Matomo
-On peut proposer (à valider) des stats anonymes ou non-anonymes. Les clients identifies pourront recevoir
-des notifications de mise à jour de thelia, des modules et templates.
 
-Les informations transmises sont les suivantes :
 
-- Données analytiques gérées par Matomo
-- Numéro de version de Thelia
-- Liste des modules activés avec leur type
-- Pour les clients non-anonymisés on remonte en plus les données citées au §2
+

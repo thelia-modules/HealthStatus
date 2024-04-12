@@ -4,11 +4,16 @@ namespace HealthStatus\Service;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Thelia\Model\ModuleConfigQuery;
 use Thelia\Model\ModuleQuery;
 
 class ModulesConfig
 {
+    /**
+     * @throws InvalidArgumentException
+     */
     public function getModules(): array
     {
         $accessToken = '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';
@@ -49,14 +54,14 @@ class ModulesConfig
                 }
             }
 
-            $modulesList[] = [
-                'code' => $module->getCode(),
-                'title' => $module->getTitle(),
-                'active' => $module->getActivate(),
-                'version' => $module->getVersion(),
-                'latestVersion' => $latestVersion,
-            ];
-        }
+                $modulesList[] = [
+                    'code' => $module->getCode(),
+                    'title' => $module->getTitle(),
+                    'status' => $module->getActivate() == 1 ? 'active' : 'inactive',
+                    'version' => $module->getVersion(),
+                    'latestVersion' => $latestVersion,
+                ];
+            }
 
         return $modulesList;
     }
@@ -65,14 +70,14 @@ class ModulesConfig
     public function getActiveModules(array $modulesList): array
     {
         return array_filter($modulesList, function ($module) {
-            return $module['code'] !== 'WebProfiler' && $module['active'] == 1;
+            return $module['code'] !== 'WebProfiler' && $module['status'] == 'active';
         });
     }
 
     public function getInactiveModules(array $modulesList): array
     {
         return array_filter($modulesList, function ($module) {
-            return $module['active'] == 0;
+            return $module['status'] == 'inactive';
         });
     }
 
@@ -81,11 +86,23 @@ class ModulesConfig
         return count($activeModules);
     }
 
-    public function getNumberOfInactiveModules(array $inactiveModules): array
+    public function getNumberOfInactiveModules(array $inactiveModules): int
     {
-        return [
-            'value' => count($inactiveModules),
-            'type' => DefineTypeConfig::determineType('numberOfInactiveModules'),
-        ];
+        return count($inactiveModules);
     }
+
+    public function checkMailCatcherStatus()
+    {
+
+        $mailCatcherModule = ModuleQuery::create()
+            ->filterByCode('TheliaMailCatcher')
+            ->findOne();
+
+        if ($mailCatcherModule == null || $mailCatcherModule->getActivate() == 0) {
+            return false;
+        }
+        return true;
+    }
+
+
 }

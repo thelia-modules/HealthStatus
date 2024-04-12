@@ -6,18 +6,20 @@ class PerformanceConfig
 {
     public function getPerformanceConfig(): array
     {
-        $performance = [
+        $memoryUsage = memory_get_usage(true);
+        $averageMemoryUsage = memory_get_peak_usage(true);
+
+        return [
             'memoryUsage' => [
                 'label' => 'Memory usage',
-                'value' => memory_get_usage(),
+                'value' => $memoryUsage,
             ],
-            'peakMemoryUsage' => [
-                'label' => 'Peak memory usage',
-                'value' => memory_get_peak_usage(),
+            'averageMemoryUsage' => [
+                'label' => 'Average memory usage over the last week',
+                'value' => $averageMemoryUsage,
             ],
         ];
-
-        return $performance;
-
     }
+
+
 }

@@ -2,6 +2,7 @@
 
 {block name='page-title'}{intl l='Health Status' d='healthstatus.bo.default'}{/block}
 
+
 {block name='check-resource'}admin.module{/block}
 {block name='check-access'}view{/block}
 {block name='main-content'}
@@ -9,10 +10,10 @@
 <div class='general-block-decorator'>
     <div class='row'>
         <div class='col-md-12 title'>
-            Status
+            {intl l='Modules Overview' d='healthstatus.bo.default'}
         </div>
         <div class='col-md-12'>
-            <p>The site health check shows information about your configuration and items that may need your attention.</p>
+            {intl l='Find information about the modules installed on your Thelia installation. You can see the version of each module and if it is up to date.' d='healthstatus.bo.default'}
             <div class='accordion-container'>
                 <button class='toggleButton' aria-expanded='false'>{intl l='You have' d='healthstatus.bo.default'} {$numberOfActiveModules} {intl l='active modules' d='healthstatus.bo.default'}<i class='fas fa-chevron-down'></i></button>
                 <div class='health-check-accordion-panel hidden'>
@@ -41,11 +42,8 @@
                     </table>
                 </div>
                 <button class='toggleButton' aria-expanded='false'>
-                    {intl l='You have' d='healthstatus.bo.default'} {$numberOfInactiveModules.value} {intl l='inactive modules' d='healthstatus.bo.default'}
-                    <div>
-                        <span class='type'>{intl l=$numberOfInactiveModules.type d='healthstatus.bo.default'}</span>
+                    {intl l='You have' d='healthstatus.bo.default'} {$numberOfInactiveModules} {intl l='inactive modules' d='healthstatus.bo.default'}
                         <i class='fas fa-chevron-down'></i>
-                    </div>
                 </button>
                 <div class='health-check-accordion-panel hidden'>
                     <p>{intl l='Inactive modules are modules that are installed but not enabled. They can be enabled in the module configuration page.' d='healthstatus.bo.default'}</p>
@@ -90,38 +88,18 @@
                         </tbody>
                     </table>
                 </div>
-                {if $numberOfOverride > 0}
-                <button class='toggleButton' aria-expanded='false'>{$numberOfOverride} {intl l='override(s) files have been detected' d='healthstatus.bo.default'}<i class='fas fa-chevron-down'></i></button>
-                <div class='health-check-accordion-panel hidden'>
-                    <table class='health-check-table' role='presentation'>
-                        <tbody>
-                        <tr>
-                            <th>Path</th>
-                            <th>File</th>
-                        </tr>
-                        {foreach $overrideFiles as $file}
-                        <tr>
-                            <td data-export-label="">{$file.path}</td>
-                            <td class='value'>{$file.file}</td>
-                        </tr>
-                        {/foreach}
-                        </tbody>
-                    </table>
-                </div>
-                {/if}
+                {assign var="hasUnconfiguredModules" value=false}
+                {foreach $moduleConfigCheck as $moduleConfig}
+                {if $moduleConfig.completed == 'No'}
+                {assign var="hasUnconfiguredModules" value=true}
                 <button class='toggleButton' aria-expanded='false'>
-                    HTTPS {if $httpsCheck == 'yes'} {intl l='is enabled' d='healthstatus.bo.default'} {else} {intl l='is disabled' d='healthstatus.bo.default'} {/if}
-                    <div>
-                        <span class='type'>{intl l=$httpsCheck.type d='healthstatus.bo.default'}</span>
-                        <i class='fas fa-chevron-down'></i>
-                    </div>
+                    {intl l='The module' d='healthstatus.bo.default'} {$moduleConfig.module} {intl l='is not fully configured' d='healthstatus.bo.default'}
                 </button>
                 <div class='health-check-accordion-panel hidden'>
-                    {if $httpsCheck == 'yes'}
-                    <p>{intl l='Your adress is secure' d='healthstatus.bo.default'} {else}</p>
-
-                    <p>{intl l='Your adress is not secure' d='healthstatus.bo.default'} {/if}</p>
+                    <p>{intl l='The module' d='healthstatus.bo.default'} {$moduleConfig.module} {intl l='is not fully configured. Please check the module configuration page.' d='healthstatus.bo.default'}</p>
                 </div>
+                {/if}
+                {/foreach}
             </div>
         </div>
     </div>
@@ -130,54 +108,16 @@
 <div class='general-block-decorator'>
     <div class='row'>
         <div class='col-md-12 title'>
-            Informations
+            {intl l='Site Overview' d='healthstatus.bo.default'}
         </div>
         <div class='col-md-12'>
-            <button id='copyConfigButton' class='btn btn-default'>Copier la configuration</button>
-            <p>
-                This page can be used to check the health of your Thelia installation. It will display information about your Thelia configuration, your server and your database.
-            </p>
-            <div class='accordion-container' id='info-config'>
+            {intl l='Find information about your website configuration and performance.' d='healthstatus.bo.default'}
+            <div class="accordion-container">
                 <button class='toggleButton' aria-expanded='false'>Thelia<i class='fas fa-chevron-down arrow'></i></button>
                 <div class='health-check-accordion-panel hidden'>
                     <table class='health-check-table' role='presentation'>
                         <tbody>
                         {foreach $theliaConfig as $config}
-                        <tr>
-                            <td data-export-label='{intl l=$config.label d='healthstatus.bo.default'}'>{intl l=$config.label d='healthstatus.bo.default'}</td>
-                            <td class='value'>{$config.value}</td>
-                        </tr>
-                        {/foreach}
-                        </tbody>
-                    </table>
-                </div>
-                <button class='toggleButton' aria-expanded='false'>{intl l='Server' d='healthstatus.bo.default'}<i class='fas fa-chevron-down arrow'></i></button>
-                {assign var='counter' value=0}
-                <div class='health-check-accordion-panel hidden'>
-                    <table class='health-check-table' role='presentation'>
-                        <tbody>
-                        {foreach $phpConfig as $config}
-                        <tr>
-                            <td data-export-label='{intl l=$config.label d='healthstatus.bo.default'}'>{intl l=$config.label d='healthstatus.bo.default'}</td>
-                            <td class='value'>
-                                {$config.value} {if $counter == 1} {if $config.value < '8.0.2'}<span class='error'> {intl l='(Minimum version required: 8.0.2)' d='healthstatus.bo.default'}</span> {else}
-                                <span class='success'> {intl l='(OK)' d='healthstatus.bo.default'}</span> {/if} {elseif $counter == 2} {if $config.value < 128 }
-                                <span class='error'> {intl l='(Preferably 256M)' d='healthstatus.bo.default'}</span> {else} <span class='success'> {intl l='(OK)' d='healthstatus.bo.default'}</span> {/if} {elseif $counter == 3} {if
-                                $config.value < 20 }<span class='error'> {intl l='(Preferably 20M)' d='healthstatus.bo.default'}</span> {else} <span class='success'> {intl l='(OK)' d='healthstatus.bo.default'}</span> {/if} {elseif
-                                $counter == 4} {if $config.value < 2 }<span class='error'> {intl l='(Preferably 2M)' d='healthstatus.bo.default'}</span> {else}
-                                <span class='success'> {intl l='(OK)' d='healthstatus.bo.default'}</span> {/if} {elseif $counter == 5} {if $config.value !== 'off' }
-                                <span class='error'> {intl l='(Disable it preferably)' d='healthstatus.bo.default'}</span> {else} <span class='success'> {intl l='(OK)' d='healthstatus.bo.default'}</span> {/if} {/if}
-                            </td>
-                        </tr>
-                        {assign var='counter' value=$counter+1} {/foreach}
-                        </tbody>
-                    </table>
-                </div>
-                <button class='toggleButton' aria-expanded='false'>{intl l='Database' d='healthstatus.bo.default'}<i class='fas fa-chevron-down arrow'></i></button>
-                <div class='health-check-accordion-panel hidden'>
-                    <table class='health-check-table' role='presentation'>
-                        <tbody>
-                        {foreach $databaseConfig as $config}
                         <tr>
                             <td data-export-label='{intl l=$config.label d='healthstatus.bo.default'}'>{intl l=$config.label d='healthstatus.bo.default'}</td>
                             <td class='value'>{$config.value}</td>
@@ -199,11 +139,202 @@
                         </tbody>
                     </table>
                 </div>
+                {if $numberOfOverride > 0}
+                <button class='toggleButton' aria-expanded='false'>{$numberOfOverride} {intl l='override(s) files have been detected' d='healthstatus.bo.default'}<i class='fas fa-chevron-down'></i></button>
+                <div class='health-check-accordion-panel hidden'>
+                    <table class='health-check-table' role='presentation'>
+                        <tbody>
+                        <tr>
+                            <th>{intl l='Path' d='healthstatus.bo.default'}</th>
+                            <th>{intl l='File' d='healthstatus.bo.default'}</th>
+                        </tr>
+                        {foreach $overrideFiles as $file}
+                        <tr>
+                            <td data-export-label="">{$file.path}</td>
+                            <td class='value'>{$file.file}</td>
+                        </tr>
+                        {/foreach}
+                        </tbody>
+                    </table>
+                </div>
+                {/if}
+                {if $mailCatcherCheck === false}
+                <button class='toggleButton' aria-expanded='false'>
+                    {intl l='MailCatcher is not enabled' d='healthstatus.bo.default'}
+                    <i class='fas fa-chevron-down'></i>
+                </button>
+                <div class='health-check-accordion-panel hidden'>
+                    <p>{intl l='MailCatcher is a tool that captures email sent by your application and displays them in a web interface. It is useful for debugging and testing email sending.' d='healthstatus.bo.default'}</p>
+                </div>
+                {else}
+                <button class='toggleButton' aria-expanded='false'>
+                    {intl l='MailCatcher is enabled' d='healthstatus.bo.default'}
+                    <i class='fas fa-chevron-down'></i>
+                </button>
+                <div class='health-check-accordion-panel hidden'>
+                    <p>{intl l='MailCatcher is a tool that captures email sent by your application and displays them in a web interface. It is useful for debugging and testing email sending.' d='healthstatus.bo.default'}</p>
+                </div>
+                {/if}
             </div>
         </div>
     </div>
 </div>
 
+<div class='general-block-decorator'>
+    <div class='row'>
+        <div class='col-md-12 title'>
+            {intl l='Server Overview' d='healthstatus.bo.default'}
+        </div>
+        <div class='col-md-12'>
+            {intl l='Find information about your server configuration and your database.' d='healthstatus.bo.default'}
+            <div class='accordion-container' id='info-config'>
+                <button class='toggleButton' aria-expanded='false'>{intl l='Server' d='healthstatus.bo.default'}<i class='fas fa-chevron-down arrow'></i></button>
+                {assign var='counter' value=0}
+                <div class='health-check-accordion-panel hidden'>
+                    <table class='health-check-table' role='presentation'>
+                        <tbody>
+                        {foreach $phpConfig as $config}
+                        <tr>
+                            <td data-export-label='{intl l=$config.label d='healthstatus.bo.default'}'>{intl l=$config.label d='healthstatus.bo.default'}</td>
+                            <td class='value'>
+                                {if $config.label == 'PHP version'}
+                                <span class='type'>{$config.type}</span>
+                                {/if}
+                                {$config.value}
+                            </td>
+                        </tr>
+                        {/foreach}
+                        </tbody>
+                    </table>
+                </div>
+                <button class='toggleButton' aria-expanded='false'>{intl l='Database' d='healthstatus.bo.default'}<i class='fas fa-chevron-down arrow'></i></button>
+                <div class='health-check-accordion-panel hidden'>
+                    <table class='health-check-table' role='presentation'>
+                        <tbody>
+                        {foreach $databaseConfig as $config}
+                        <tr>
+                            <td data-export-label='{intl l=$config.label d='healthstatus.bo.default'}'>{intl l=$config.label d='healthstatus.bo.default'}</td>
+                            <td class='value'>{$config.value}</td>
+                        </tr>
+                        {/foreach}
+                        </tbody>
+                    </table>
+                </div>
+                {if $extensions.hasMissingExtensions}
+                <button class='toggleButton' aria-expanded='false'>{intl l='You have missing PHP extensions' d='healthstatus.bo.default'}<i class='fas fa-chevron-down'></i></button>
+                <div class='health-check-accordion-panel hidden'>
+                    <p>{intl l='The following PHP extensions are missing. Please install them to ensure the proper functioning of your Thelia installation.' d='healthstatus.bo.default'}</p>
+                    <table class='health-check-table' role='presentation'>
+                        <tbody>
+                        <tr>
+                            <th>Extension</th>
+                        </tr>
+                        {foreach $extensions.missing as $missingExtension}
+                        <tr>
+                            <td data-export-label="">{$missingExtension}</td>
+                        </tr>
+                        {/foreach}
+                        </tbody>
+                    </table>
+                </div>
+                {/if}
+                {if $phpConfig.phpVersion.value < '8.0.2' }
+                <button class='toggleButton' aria-expanded='false'>{intl l='You are using an outdated PHP version' d='healthstatus.bo.default'}
+                        <i class='fas fa-chevron-down'></i>
+                </button>
+                <div class='health-check-accordion-panel hidden'>
+                    <p>{$phpConfig.phpVersion.value} {intl l='is the current version of PHP you are using. We recommend you to upgrade to the latest version of PHP.' d='healthstatus.bo.default'}</p>
+                </div>
+                {/if}
+                {if $phpConfig.memoryLimit.valueConvert < $phpConfig.memoryLimit.recommended}
+                <button class='toggleButton' aria-expanded='false'>{intl l='Your PHP memory limit is too low' d='healthstatus.bo.default'}
+                        <i class='fas fa-chevron-down'></i>
+                </button>
+                <div class='health-check-accordion-panel hidden'>
+                    <p>{$phpConfig.memoryLimit.value} {intl l='is the current memory limit of PHP you are using.' d='healthstatus.bo.default'}</p>
+                </div>
+                {/if}
+                {if $phpConfig.maxPostSize.valueConvert < $phpConfig.maxPostSize.recommended}
+                <button class='toggleButton' aria-expanded='false'>{intl l='Your PHP max post size is too low' d='healthstatus.bo.default'}
+                        <i class='fas fa-chevron-down'></i>
+                </button>
+                <div class='health-check-accordion-panel hidden'>
+                    <p>{$phpConfig.maxPostSize.value} {intl l='is the current max post size of PHP you are using.' d='healthstatus.bo.default'}{intl l=' 20M is the recommended max post size.' d='healthstatus.bo.default'}</p>
+                </div>
+                {/if}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class='general-block-decorator'>
+    <div class='row'>
+        <div class='col-md-12 title'>
+            {intl l='Security Overview' d='healthstatus.bo.default'}
+        </div>
+        <div class='col-md-12'>
+            {intl l='Find information about your website security.' d='healthstatus.bo.default'}
+            <div class="accordion-container">
+                <button class='toggleButton' aria-expanded='false'>
+                    HTTPS {if $httpsCheck == 'yes'} {intl l='is enabled' d='healthstatus.bo.default'} {else} {intl l='is disabled' d='healthstatus.bo.default'} {/if}
+                        <i class='fas fa-chevron-down'></i>
+                </button>
+                <div class='health-check-accordion-panel hidden'>
+                    {if $httpsCheck == 'yes'}
+                    <p>{intl l='Your adress is secure' d='healthstatus.bo.default'} {else}</p>
+
+                    <p>{intl l='Your adress is not secure' d='healthstatus.bo.default'} {/if}</p>
+                </div>
+
+                {if $checkAdminRoute === disabled}
+                <button class='toggleButton' aria-expanded='false'>
+                    {intl l='The admin route is not secure' d='healthstatus.bo.default'}
+                        <i class='fas fa-chevron-down'></i>
+                </button>
+                <div class='health-check-accordion-panel hidden'>
+                    <p>{intl l='Your admin route is not secure. Please change it to a secure route.' d='healthstatus.bo.default'}</p>
+                </div>
+                {else}
+                <button class='toggleButton' aria-expanded='false'>
+                    {intl l='The admin route is secure' d='healthstatus.bo.default'}
+                        <i class='fas fa-chevron-down'></i>
+                </button>
+                <div class='health-check-accordion-panel hidden'>
+                    <p>{intl l='Your admin route is secure.' d='healthstatus.bo.default'}</p>
+                </div>
+                {/if}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class='general-block-decorator'>
+    <div class='row'>
+        <div class='col-md-12 title'>
+            {intl l='Shop Overview' d='healthstatus.bo.default'}
+        </div>
+        <div class='col-md-12'>
+            {intl l='Find information about your shop.' d='healthstatus.bo.default'}
+            <br>
+            <br>
+            <table class='health-check-table' role='presentation'>
+                <tbody>
+                <tr>
+                    <th>{intl l='Last order date' d='healthstatus.bo.default'}</th>
+                    <th>{intl l='Last order paid date and payment method' d='healthstatus.bo.default'}</th>
+                    <th>{intl l='Last product added date' d='healthstatus.bo.default'}</th>
+                </tr>
+                <tr>
+                    <td>{$lastOrder.value}</td>
+                    <td>{$lastOrderPaid.value} - {$lastPaidPaymentModule.value}</td>
+                    <td>{$lastProductAdded.value}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 <script>
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -217,30 +348,6 @@
                 accordionContent.classList.toggle('hidden');
             });
         });
-    });
-
-
-    document.getElementById('copyConfigButton').addEventListener('click', function() {
-        var allData = '';
-
-        var sectionButtons = document.querySelectorAll('#info-config .toggleButton');
-
-        sectionButtons.forEach(function(button) {
-            allData += '##### ' + button.innerText.trim() + ' ##### \n \n';
-
-            var section = button.nextElementSibling;
-            var labelElements = section.querySelectorAll('td[data-export-label]');
-            var valueElements = section.querySelectorAll('.value');
-
-            for (var i = 0; i < labelElements.length; i++) {
-                var label = labelElements[i].innerText.trim();
-                var valueElement = valueElements[i];
-                var value = valueElement.innerHTML.replace(/<span class='(error|success)'>.*?<\/span>/g, '').trim();
-                allData += label + ': ' + value + '\n';
-            }
-            allData += '\n';
-        });
-        navigator.clipboard.writeText(allData);
     });
 
 </script>

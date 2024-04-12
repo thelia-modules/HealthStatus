@@ -3,8 +3,9 @@
 namespace HealthStatus\Service;
 
 use HealthStatus\HealthStatus;
+use Thelia\Model\ConfigQuery;
 
-class PhpConfig
+class ServerConfig
 {
     public function getPhpConfig(): array
     {
@@ -15,7 +16,7 @@ class PhpConfig
             ],
             'phpVersion' => [
                 'label' => 'PHP Server',
-                'value' => PHP_VERSION,
+            'value' => 7.4,
             ],
             'phpCli' => [
                 'label' => 'PHP CLI',
@@ -71,6 +72,42 @@ class PhpConfig
                 $value *= 1024;
         }
         return $value;
+    }
+
+    public function checkRouteAdmin()
+    {
+        $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http";
+        $url = $protocol . "://" . $_SERVER['HTTP_HOST'] . '/admin';
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
+        curl_setopt($ch, CURLOPT_HEADER, 1);
+        curl_exec($ch);
+
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+
+        if ($status === 302 || $status === 200) {
+            return 'enabled';
+        } else {
+            return 'disabled';
+        }
+    }
+
+    public function checkNotificationsMail ()
+    {
+        $configMail = ConfigQuery::create()
+            ->filterByName('store_notification_emails')
+            ->findOne();
+
+        if ($configMail !== null) {
+            return 'enabled';
+        } else {
+            return 'disabled';
+        }
+
     }
 
 }
