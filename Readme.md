@@ -4,7 +4,6 @@ Find out information about the health of your Thelia installation.
 
 ## Installation
 
----
 ### Manually
 
 * Copy the module into ```<thelia_root>/local/modules/``` directory and be sure that the name of the module is HealthStatus.
@@ -20,14 +19,11 @@ composer require thelia/health-status-module:~1.0
 
 ## Usage
 
----
 Once activated, you can access the health status page by going to the following URL: ```/admin/module/HealthStatus/show```
 The module works on a system of event. 
 It sends a GenericEvent with the name "module.config", all the modules can listen to this event and add their own health checks.
 
 ## Extending the module
-
----
 
 You can add your own health checks by listening to the "module.config" event.
 You have to create a new EventListener on the module you want to add the health check to. 
