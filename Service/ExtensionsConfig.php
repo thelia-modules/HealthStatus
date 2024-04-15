@@ -14,8 +14,6 @@ class ExtensionsConfig
             'gd',
             'dom',
             'intl',
-            'test',
-            'test2',
         ];
         $missingExtensions = array_diff($requiredExtensions, $extensions);
         $hasMissingExtensions = !empty($missingExtensions);

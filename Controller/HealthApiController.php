@@ -11,16 +11,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Core\HttpFoundation\Request;
 
-
-/**
- * @OA\Info(
- *  title="Thelia OpenApi",
- *  version="0.0.1",
- * ),
- */
 class HealthApiController extends BaseFrontController
 {
-    #[Route('/healthstatus/api/doc', name: 'healthstatus_doc', methods: ['GET'])]
+    #[Route('/doc', name: 'healthstatus_doc', methods: ['GET'])]
     public function getDocumentation(Request $request)
     {
         header('Access-Control-Allow-Origin: *');
@@ -33,8 +26,8 @@ class HealthApiController extends BaseFrontController
 
         $host = $request->getSchemeAndHttpHost();
         $annotations['servers'] = [
-            ['url' => $host.'/healthstatus/api'],
-            ['url' => $host.'/index_dev.php/healtstatus/api'],
+            ['url' => $host.'/healthstatus/open_api'],
+            ['url' => $host.'/index_dev.php/healthstatus/open_api'],
         ];
 
         return $this->render('swagger-ui', [

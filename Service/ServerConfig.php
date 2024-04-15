@@ -16,7 +16,7 @@ class ServerConfig
             ],
             'phpVersion' => [
                 'label' => 'PHP Server',
-            'value' => 7.4,
+            'value' => phpversion(),
             ],
             'phpCli' => [
                 'label' => 'PHP CLI',
