@@ -67,7 +67,7 @@ class MyModuleHealthCheckListener implements EventSubscriberInterface
 ```
 
 > [!CAUTION]
-> If you're running Thelia version 2.4 or lower, you need to add the following code to services.xml for the EventListener to work, but also on slightly older modules. ( In Thelia 2.5 and newer modules, the EventListener is automatically detected with autowiring. )
+> If you're running Thelia version 2.4 or lower, you need to add the following code to config.xml for the EventListener to work, but also on slightly older modules. ( In Thelia 2.5 and newer modules, the EventListener is automatically detected with autowiring. )
 
 ### Example
 ```xml
@@ -141,7 +141,7 @@ class MyModuleHealthCheckListener implements EventSubscriberInterface
 ```
 
 > [!CAUTION] 
-> Si vous exécutez une version 2.4 de Thelia ou inférieure, vous devez ajouter le code suivant au services.xml pour que l'EventListener fonctionne, mais aussi sur les modules qui sont un peu plus anciens. ( Dans Thelia 2.5 et pour les modules plus récents, l'EventListener est automatiquement détecté avec l'autowiring. )
+> Si vous exécutez une version 2.4 de Thelia ou inférieure, vous devez ajouter le code suivant au config.xml pour que l'EventListener fonctionne, mais aussi sur les modules qui sont un peu plus anciens. ( Dans Thelia 2.5 et pour les modules plus récents, l'EventListener est automatiquement détecté avec l'autowiring. )
 
 ### Exemple
 ```xml
