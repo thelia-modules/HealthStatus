@@ -26,6 +26,8 @@ use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\GenericEvent;
 use Thelia\Controller\Admin\BaseAdminController;
+use Symfony\Component\Routing\Annotation\Route;
+
 /**
  * @Route("/admin/healthstatus", name="health")
  */
