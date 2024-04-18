@@ -18,6 +18,7 @@ class ConfigHook extends BaseHook
         $expirationTime = HealthStatus::getExpirationTime();
         $expirationTime = $expirationTime - time();
         $secretKey = HealthStatus::getSecretKey();
+        $gitHubToken = HealthStatus::getGitHubToken();
 
 
         if ($expirationTime <= 0) {
@@ -29,7 +30,8 @@ class ConfigHook extends BaseHook
 
         $event->add($this->render("config/module-config.html", [
             'expiration_time' => $expirationTime,
-            'secret_key' => $secretKey
+            'secret_key' => $secretKey,
+            'github_token' => $gitHubToken
         ]));
     }
 }

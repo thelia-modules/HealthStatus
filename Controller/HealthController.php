@@ -11,7 +11,6 @@
  */
 
 namespace HealthStatus\Controller;
-use Composer\EventDispatcher\EventDispatcher;
 use HealthStatus\HealthStatus;
 use HealthStatus\Service\CheckOverridesConfig;
 use HealthStatus\Service\ComposerModulesConfig;
@@ -26,12 +25,7 @@ use HealthStatus\Service\TheliaConfig;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\GenericEvent;
-use Thelia\Action\Order;
 use Thelia\Controller\Admin\BaseAdminController;
-use Symfony\Component\Routing\Annotation\Route;
-use Thelia\Core\Event\TheliaEvents;
-use Thelia\Core\HttpFoundation\Request;
-
 /**
  * @Route("/admin/healthstatus", name="health")
  */
@@ -54,7 +48,6 @@ class HealthController extends BaseAdminController
         $event = new GenericEvent($subject);
         $eventDispatcher->dispatch($event,'module.config');
         $modulesConfigCheck = $event->getArguments();
-
 
         $ServerConfig = new ServerConfig();
         $phpConfig = $ServerConfig->getPhpConfig();

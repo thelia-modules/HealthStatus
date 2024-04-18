@@ -88,10 +88,9 @@
                         </tbody>
                     </table>
                 </div>
-                {assign var="hasUnconfiguredModules" value=false}
                 {foreach $moduleConfigCheck as $moduleConfig}
-                {if $moduleConfig.completed == 'No'}
-                {assign var="hasUnconfiguredModules" value=true}
+                {if $moduleConfig.completed === false}
+                {assign var="hasUnconfiguredModules" value=false}
                 <button class='toggleButton' aria-expanded='false'>
                     {intl l='The module' d='healthstatus.bo.default'} {$moduleConfig.module} {intl l='is not fully configured' d='healthstatus.bo.default'}
                 </button>

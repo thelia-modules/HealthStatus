@@ -61,6 +61,10 @@ class HealthStatus extends BaseModule
         return self::getConfigValue('expiration_time');
     }
 
+    public static function getGitHubToken(): ?string
+    {
+        return self::getConfigValue('github_token');
+    }
 
     /*
      * You may now override BaseModuleInterface methods, such as:

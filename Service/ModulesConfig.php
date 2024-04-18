@@ -2,11 +2,10 @@
 
 namespace HealthStatus\Service;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
+use HealthStatus\HealthStatus;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-use Thelia\Model\ModuleConfigQuery;
+use Symfony\Component\HttpClient\HttpClient;
 use Thelia\Model\ModuleQuery;
 
 class ModulesConfig
@@ -16,13 +15,21 @@ class ModulesConfig
      */
     public function getModules(): array
     {
-        $accessToken = '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';
+        $accessToken = HealthStatus::getGitHubToken();
         $owner = 'thelia-modules';
 
         $modules = ModuleQuery::create()->find();
         $modulesList = [];
 
         $cache = new FilesystemAdapter();
+
+        $client = HttpClient::create([
+            'base_uri' => 'https://api.github.com/',
+            'headers' => [
+                'Authorization' => 'token ' . $accessToken,
+                'Accept' => 'application/vnd.github.v3+json',
+            ],
+        ]);
 
         foreach ($modules as $module) {
             $moduleCode = $module->getCode();
@@ -33,15 +40,8 @@ class ModulesConfig
             } else {
                 $latestVersion = '0';
                 try {
-                    $client = new Client([
-                        'base_uri' => 'https://api.github.com/',
-                        'headers' => [
-                            'Authorization' => 'token ' . $accessToken,
-                            'Accept' => 'application/vnd.github.v3+json',
-                        ],
-                    ]);
-                    $response = $client->get("repos/$owner/$repo/tags");
-                    $tags = json_decode($response->getBody(), true);
+                    $response = $client->request('GET', "repos/$owner/$repo/tags");
+                    $tags = $response->toArray();
 
                     if (!empty($tags)) {
                         $latestTag = $tags[0];
@@ -50,19 +50,18 @@ class ModulesConfig
 
                     $cacheItem->set($latestVersion);
                     $cache->save($cacheItem);
-                } catch (GuzzleException $e) {
+                } catch (\Exception $e) {
                 }
             }
 
-                $modulesList[] = [
-                    'code' => $module->getCode(),
-                    'title' => $module->getTitle(),
-                    'status' => $module->getActivate() == 1 ? 'active' : 'inactive',
-                    'version' => $module->getVersion(),
-                    'latestVersion' => $latestVersion,
-                ];
-            }
-
+            $modulesList[] = [
+                'code' => $module->getCode(),
+                'title' => $module->getTitle(),
+                'status' => $module->getActivate() == 1 ? 'active' : 'inactive',
+                'version' => $module->getVersion(),
+                'latestVersion' => $latestVersion,
+            ];
+        }
         return $modulesList;
     }
 
@@ -91,7 +90,7 @@ class ModulesConfig
         return count($inactiveModules);
     }
 
-    public function checkMailCatcherStatus()
+    public function checkMailCatcherStatus(): bool
     {
 
         $mailCatcherModule = ModuleQuery::create()

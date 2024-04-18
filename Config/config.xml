@@ -14,9 +14,8 @@
 
     </hooks>
     <forms>
-        <form name="healthstatus_configuration" class="HealthStatus\Form\ConfigurationKey" />
+        <form name="healthstatus_configuration" class="HealthStatus\Form\ConfigHealth" />
     </forms>
-
 
 </config>
 

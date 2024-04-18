@@ -12,10 +12,10 @@
 
 namespace HealthStatus\Controller;
 
-use HealthStatus\Form\ConfigurationKey;
+use HealthStatus\Form\ConfigHealth;
 use HealthStatus\HealthStatus;
-use HealthStatus\Service\JwtConfig;
 use Thelia\Controller\Admin\BaseAdminController;
+use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\Translation\Translator;
 use Thelia\Form\Exception\FormValidationException;
 use Symfony\Component\Routing\Annotation\Route;
@@ -26,7 +26,7 @@ class ConfigController extends BaseAdminController
 {
     public function setAction()
     {
-        $form = $this->createForm(ConfigurationKey::getName());
+        $form = $this->createForm(ConfigHealth::getName());
 
         try {
             $healthForm = $this->validateForm($form);
@@ -74,5 +74,14 @@ class ConfigController extends BaseAdminController
         HealthStatus::setConfigValue('secret_key', bin2hex(random_bytes(32)));
         return $this->generateRedirectFromRoute('admin.module.configure', [], ['module_code' => 'HealthStatus']);
     }
+    public function addGitHubToken(Request $request)
+    {
+        $githubToken = $request->request->get('github_token');
 
+        if ($githubToken !== null) {
+            HealthStatus::setConfigValue('github_token', $githubToken);
+        }
+
+        return $this->generateRedirectFromRoute('admin.module.configure', [], ['module_code' => 'HealthStatus']);
+    }
 }

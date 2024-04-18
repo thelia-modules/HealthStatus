@@ -5,7 +5,6 @@ namespace HealthStatus\Controller;
 use OpenApi\Annotations as OA;
 use OpenApi\Generator;
 use OpenApi\Util;
-use Thelia\Core\HttpFoundation\JsonResponse;
 use function OpenApi\scan;
 use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Controller\Front\BaseFrontController;

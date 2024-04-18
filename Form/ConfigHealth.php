@@ -6,12 +6,8 @@ use HealthStatus\HealthStatus;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Constraints\GreaterThan;
-use Thelia\Core\Translation\Translator;
 use Thelia\Form\BaseForm;
-use Thelia\Model\ModuleConfig;
-use Thelia\Model\ModuleConfigQuery;
-
-class ConfigurationKey extends BaseForm
+class ConfigHealth extends BaseForm
 {
     protected function buildForm(): void
     {
@@ -28,7 +24,6 @@ class ConfigurationKey extends BaseForm
             'required' => true,
             'data' => $algorithm
         ]);
-
 
 
         $expirationTime = HealthStatus::getExpirationTime();
