@@ -40,6 +40,8 @@ return [
     'override(s) files have been detected' => 'fichier(s) overrides ont été détectés',
     'MailCatcher is not enabled' => 'MailCatcher n\'est pas activé',
     'MailCatcher is enabled' => 'MailCatcher est activé',
+    'Check the modules configuration page to enable MailCatcher.' => 'Vérifiez la page de configuration des modules pour activer MailCatcher.',
+    'Check the modules configuration page to disable MailCatcher.' => 'Vérifiez la page de configuration des modules pour désactiver MailCatcher.',
     'Path' => 'Lien',
     'File' => 'Fichier',
     'Thelia Version' => 'Version de Thelia',

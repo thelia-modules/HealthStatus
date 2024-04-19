@@ -43,7 +43,7 @@ use Thelia\Model\AdminQuery;
 use OpenApi\Annotations as OA;
 
 /**
- * @Route("/healthstatus/api", name="health_json_server_info")
+ * @Route("/open_api/healthstatus", name="health_json_server_info")
  */
 class HealthJsonController extends BaseFrontController
 {
@@ -60,8 +60,8 @@ class HealthJsonController extends BaseFrontController
     #[Route('/server-site-info', name: 'health_server_site_info', methods: ['GET'])]
     /**
      * @OA\Get(
-     *     path="/server-site-info",
-     *     summary="Get server site information",
+     *     path="/healthstatus/server-site-info",
+     *     summary="Get your server and site information",
      *     tags={"HealthStatus"},
      *     @OA\Response(
      *         response=200,
@@ -140,8 +140,8 @@ class HealthJsonController extends BaseFrontController
     #[Route('/modules-info', name: 'health_modules_info', methods: ['GET'])]
     /**
      * @OA\Get(
-     *     path="/modules-info",
-     *     summary="Get modules information",
+     *     path="/healthstatus/modules-info",
+     *     summary="Get your modules information",
      *     tags={"HealthStatus"},
      *     @OA\Response(
      *         response=200,
@@ -197,8 +197,8 @@ class HealthJsonController extends BaseFrontController
     #[Route('/shop-info', name: 'health_shop_info', methods: ['GET'])]
     /**
      * @OA\Get(
-     *     path="/shop-info",
-     *     summary="Get shop information",
+     *     path="/healthstatus/shop-info",
+     *     summary="Get your shop information",
      *     tags={"HealthStatus"},
      *     @OA\Response(
      *         response=200,
@@ -256,8 +256,8 @@ class HealthJsonController extends BaseFrontController
     #[Route('/generate-token', name: 'health_generate_token', methods: ['POST'])]
     /**
      * @OA\Post(
-     *     path="/generate-token",
-     *     summary="Generate a token",
+     *     path="/healthstatus/generate-token",
+     *     summary="Generate a token to access your informations",
      *     tags={"HealthStatus"},
      *     @OA\RequestBody(
      *         description="Generate token request body",
