@@ -45,7 +45,7 @@ class ModulesConfig
 
             return json_decode($result, true) ?? [];
         } catch (Exception $e) {
-            echo 'Une erreur s\'est produite : ' . $e->getMessage();
+            return [];
         }
 
         return $modulesList;
@@ -56,7 +56,8 @@ class ModulesConfig
      */
     public function getModules(): array
     {
-        $url = 'http://thelia.th/compare.php';
+        $url = '';
+
         $remoteModulesList = $this->getModulesAndSendToEndpoint($url);
 
         if (!empty($remoteModulesList)) {
@@ -64,14 +65,12 @@ class ModulesConfig
         }
 
         $localModulesList = $this->getLocalModules();
-
         if (!empty($localModulesList)) {
             return $localModulesList;
         }
 
         return [];
     }
-
 
     private function getLocalModules(): array
     {
