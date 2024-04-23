@@ -14,6 +14,7 @@ namespace HealthStatus\Controller;
 
 use HealthStatus\Form\ConfigHealth;
 use HealthStatus\HealthStatus;
+use Random\RandomException;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\Translation\Translator;
@@ -69,6 +70,9 @@ class ConfigController extends BaseAdminController
 
     /**
      * @throws RandomException
+     */
+    /**
+     * @Route("/regenerate", name="health_regenerate_key")
      */
     public function regenerateKey()
     {
