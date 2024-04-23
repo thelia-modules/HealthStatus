@@ -95,7 +95,8 @@ return [
     'Last order date' => 'Date de la dernière commande',
     'Last order paid date and payment method' => 'Date de paiement et méthode de paiement de la dernière commande',
     'Last product added date' => 'Date du dernier produit ajouté',
-
-
+    'No payment module found' => 'Aucun module de paiement trouvé',
+    'No orders found' => 'Aucune commande trouvée',
+    'No products found' => 'Aucun produit trouvé',
 
 ];

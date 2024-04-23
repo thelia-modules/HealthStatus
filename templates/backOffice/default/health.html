@@ -325,9 +325,9 @@
                     <th>{intl l='Last product added date' d='healthstatus.bo.default'}</th>
                 </tr>
                 <tr>
-                    <td>{$lastOrder.value}</td>
-                    <td>{$lastOrderPaid.value} - {$lastPaidPaymentModule.value}</td>
-                    <td>{$lastProductAdded.value}</td>
+                    <td>{intl l=$lastOrder.value d='healthstatus.bo.default'}</td>
+                    <td>{intl l=$lastOrderPaid.value d='healthstatus.bo.default'} - {intl l=$lastPaidPaymentModule.value d='healthstatus.bo.default'}</td>
+                    <td>{intl l=$lastProductAdded.value d='healthstatus.bo.default'}</td>
                 </tr>
                 </tbody>
             </table>
