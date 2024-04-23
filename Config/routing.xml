@@ -13,10 +13,6 @@
         <default key="_controller">HealthStatus\Controller\ConfigController::regenerateKey</default>
     </route>
 
-    <route id="healthstatus.add.git.token" path="/admin/module/healthstatus/add-token" methods="post">
-        <default key="_controller">HealthStatus\Controller\ConfigController::addGitHubToken</default>
-    </route>
-
     <!--
 
     if a /admin/module/healthstatus/ route is provided, a "ConfigHealth" button will be displayed

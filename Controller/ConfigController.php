@@ -19,6 +19,7 @@ use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\Translation\Translator;
 use Thelia\Form\Exception\FormValidationException;
 use Symfony\Component\Routing\Annotation\Route;
+
 /**
  * @Route("/admin/module/healthstatus", name="health_config")
  */
@@ -72,16 +73,6 @@ class ConfigController extends BaseAdminController
     public function regenerateKey()
     {
         HealthStatus::setConfigValue('secret_key', bin2hex(random_bytes(32)));
-        return $this->generateRedirectFromRoute('admin.module.configure', [], ['module_code' => 'HealthStatus']);
-    }
-    public function addGitHubToken(Request $request)
-    {
-        $githubToken = $request->request->get('github_token');
-
-        if ($githubToken !== null) {
-            HealthStatus::setConfigValue('github_token', $githubToken);
-        }
-
         return $this->generateRedirectFromRoute('admin.module.configure', [], ['module_code' => 'HealthStatus']);
     }
 }

@@ -2,10 +2,8 @@
 
 namespace HealthStatus\Service;
 
-use HealthStatus\HealthStatus;
+use Exception;
 use Psr\Cache\InvalidArgumentException;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-use Symfony\Component\HttpClient\HttpClient;
 use Thelia\Model\ModuleQuery;
 
 class ModulesConfig
@@ -13,56 +11,84 @@ class ModulesConfig
     /**
      * @throws InvalidArgumentException
      */
-    public function getModules(): array
-    {
-        $accessToken = HealthStatus::getGitHubToken();
-        $owner = 'thelia-modules';
 
-        $modules = ModuleQuery::create()->find();
+    public function getModulesAndSendToEndpoint($url): array
+    {
         $modulesList = [];
 
-        $cache = new FilesystemAdapter();
+        try {
+            $modules = ModuleQuery::create()->find();
 
-        $client = HttpClient::create([
-            'base_uri' => 'https://api.github.com/',
-            'headers' => [
-                'Authorization' => 'token ' . $accessToken,
-                'Accept' => 'application/vnd.github.v3+json',
-            ],
-        ]);
-
-        foreach ($modules as $module) {
-            $moduleCode = $module->getCode();
-            $repo = $moduleCode;
-            $cacheItem = $cache->getItem("module_$repo");
-            if ($cacheItem->isHit()) {
-                $latestVersion = $cacheItem->get();
-            } else {
-                $latestVersion = '0';
-                try {
-                    $response = $client->request('GET', "repos/$owner/$repo/tags");
-                    $tags = $response->toArray();
-
-                    if (!empty($tags)) {
-                        $latestTag = $tags[0];
-                        $latestVersion = $latestTag['name'];
-                    }
-
-                    $cacheItem->set($latestVersion);
-                    $cache->save($cacheItem);
-                } catch (\Exception $e) {
-                }
+            foreach ($modules as $module) {
+                $modulesList[] = [
+                    'title' => $module->getTitle(),
+                    'status' => $module->getActivate() ? 'active' : 'inactive',
+                    'code' => $module->getCode(),
+                    'version' => $module->getVersion(),
+                ];
             }
 
-            $modulesList[] = [
-                'code' => $module->getCode(),
+            $postData = json_encode(['modules' => $modulesList], JSON_PRETTY_PRINT);
+
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+            $result = curl_exec($ch);
+
+            if (curl_errno($ch)) {
+                throw new Exception('Erreur cURL : ' . curl_error($ch));
+            }
+
+            curl_close($ch);
+
+            return json_decode($result, true) ?? [];
+        } catch (Exception $e) {
+            echo 'Une erreur s\'est produite : ' . $e->getMessage();
+        }
+
+        return $modulesList;
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function getModules(): array
+    {
+        $url = 'http://thelia.th/compare.php';
+        $remoteModulesList = $this->getModulesAndSendToEndpoint($url);
+
+        if (!empty($remoteModulesList)) {
+            return $remoteModulesList;
+        }
+
+        $localModulesList = $this->getLocalModules();
+
+        if (!empty($localModulesList)) {
+            return $localModulesList;
+        }
+
+        return [];
+    }
+
+
+    private function getLocalModules(): array
+    {
+        $modules = ModuleQuery::create()->find();
+        $modulesListLocal = [];
+
+        foreach ($modules as $module) {
+            $modulesListLocal[] = [
                 'title' => $module->getTitle(),
-                'status' => $module->getActivate() == 1 ? 'active' : 'inactive',
+                'status' => $module->getActivate() ? 'active' : 'inactive',
+                'code' => $module->getCode(),
                 'version' => $module->getVersion(),
-                'latestVersion' => $latestVersion,
+                'latestVersion' => '0',
             ];
         }
-        return $modulesList;
+
+        return $modulesListLocal;
     }
 
 
