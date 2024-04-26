@@ -2,6 +2,7 @@
 
 namespace HealthStatus\Service;
 
+use EditRobotTxt\Model\RobotsQuery;
 use HealthStatus\HealthStatus;
 use Thelia\Model\ConfigQuery;
 
@@ -16,7 +17,7 @@ class ServerConfig
             ],
             'phpVersion' => [
                 'label' => 'PHP Server',
-            'value' => phpversion(),
+                'value' => phpversion(),
             ],
             'phpCli' => [
                 'label' => 'PHP CLI',
@@ -41,7 +42,7 @@ class ServerConfig
                 'label' => 'Max Post Size',
                 'valueConvert' => $this->memoryToBytes(ini_get('post_max_size')),
                 'value' => ini_get('post_max_size'),
-                'recommended' => 20 * 1024 ,
+                'recommended' => 20 * 1024,
                 'type' => 'Performance',
             ],
             'maxUploadSize' => [
@@ -67,7 +68,7 @@ class ServerConfig
     {
         $unit = strtolower(substr($value, -1, 1));
         $value = (int)$value;
-        switch($unit) {
+        switch ($unit) {
             case 'm':
                 $value *= 1024;
         }
@@ -96,7 +97,7 @@ class ServerConfig
         }
     }
 
-    public function checkNotificationsMail ()
+    public function checkNotificationsMail()
     {
         $configMail = ConfigQuery::create()
             ->filterByName('store_notification_emails')
@@ -108,6 +109,35 @@ class ServerConfig
             return 'disabled';
         }
 
+    }
+
+    public function checkRobotsTxtFile(): string
+    {
+        $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http";
+        $url = $protocol . "://" . $_SERVER['HTTP_HOST'] . '/robots.txt';
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
+        curl_setopt($ch, CURLOPT_HEADER, 1);
+        curl_exec($ch);
+
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        curl_close($ch);
+
+        $configRobots = RobotsQuery::create()
+            ->findOneByDomainName($_SERVER['HTTP_HOST']);
+
+        $fileContent = $configRobots->getRobotsContent();
+
+        if ($status === 200 && $fileContent !== null &&
+            str_contains($fileContent, '@url: ' . $protocol . "://" . $_SERVER['HTTP_HOST']) &&
+            str_contains($fileContent, 'Sitemap: ' . $protocol . "://" . $_SERVER['HTTP_HOST'] . '/sitemap')) {
+            return 'enabled';
+        } else {
+            return 'disabled';
+        }
     }
 
 }

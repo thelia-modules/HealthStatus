@@ -11,6 +11,7 @@
  */
 
 namespace HealthStatus\Controller;
+
 use HealthStatus\HealthStatus;
 use HealthStatus\Service\CheckOverridesConfig;
 use HealthStatus\Service\ComposerModulesConfig;
@@ -48,13 +49,14 @@ class HealthController extends BaseAdminController
     {
         $subject = $this->subject;
         $event = new GenericEvent($subject);
-        $eventDispatcher->dispatch($event,'module.config');
+        $eventDispatcher->dispatch($event, 'module.config');
         $modulesConfigCheck = $event->getArguments();
 
         $ServerConfig = new ServerConfig();
         $phpConfig = $ServerConfig->getPhpConfig();
         $checkAdminRoute = $ServerConfig->checkRouteAdmin();
         $checkMailNotification = $ServerConfig->checkNotificationsMail();
+        $checkEditRobotsFile = $ServerConfig->checkRobotsTxtFile();
 
         $theliaConfig = new TheliaConfig();
         $theliaConfig = $theliaConfig->getTheliaConfig();
@@ -73,7 +75,7 @@ class HealthController extends BaseAdminController
         $numberOfInactiveModules = $modulesService->getNumberOfInactiveModules($inactiveModules);
         $mailCatcherCheck = $modulesService->checkMailCatcherStatus();
 
-        $composerJsonPath = THELIA_ROOT.'/composer.json';
+        $composerJsonPath = THELIA_ROOT . '/composer.json';
         $composerModulesService = new ComposerModulesConfig();
         $composerModules = $composerModulesService->getComposerModules($composerJsonPath);
 
@@ -101,29 +103,30 @@ class HealthController extends BaseAdminController
 
         return
             $this->render('health', [
-                'theliaConfig' => $theliaConfig,
-                'phpConfig' => $phpConfig,
-                'databaseConfig' => $databaseConfig,
-                'activeModules' => $activeModules,
-                'inactiveModules' => $inactiveModules,
-                'composerModules' => $composerModules,
-                'numberOfActiveModules' => $numberOfActiveModules,
-                'numberOfInactiveModules' => $numberOfInactiveModules,
-                'numberOfComposerModules' => $numberOfComposerModules,
-                'httpsCheck' => $httpsCheck,
-                'performance' => $performance,
-                'overrideFiles' => $checkOverrideFiles,
-                'numberOfOverride' => $numberOfOverride,
-                'extensions' => $extensions,
-                'lastOrder' => $lastOrderValue,
-                'lastOrderPaid' => $lastOrderPaidDate,
-                'lastPaidPaymentModule' => $lastOrderPaidModule,
-                'lastProductAdded' => $lastProductAddedDate,
-                'mailCatcherCheck' => $mailCatcherCheck,
-                'checkAdminRoute' => $checkAdminRoute,
-                'moduleConfigCheck' => $modulesConfigCheck,
-                'checkMailNotification' => $checkMailNotification
-            ]
-        );
+                    'theliaConfig' => $theliaConfig,
+                    'phpConfig' => $phpConfig,
+                    'databaseConfig' => $databaseConfig,
+                    'activeModules' => $activeModules,
+                    'inactiveModules' => $inactiveModules,
+                    'composerModules' => $composerModules,
+                    'numberOfActiveModules' => $numberOfActiveModules,
+                    'numberOfInactiveModules' => $numberOfInactiveModules,
+                    'numberOfComposerModules' => $numberOfComposerModules,
+                    'httpsCheck' => $httpsCheck,
+                    'performance' => $performance,
+                    'overrideFiles' => $checkOverrideFiles,
+                    'numberOfOverride' => $numberOfOverride,
+                    'extensions' => $extensions,
+                    'lastOrder' => $lastOrderValue,
+                    'lastOrderPaid' => $lastOrderPaidDate,
+                    'lastPaidPaymentModule' => $lastOrderPaidModule,
+                    'lastProductAdded' => $lastProductAddedDate,
+                    'mailCatcherCheck' => $mailCatcherCheck,
+                    'checkAdminRoute' => $checkAdminRoute,
+                    'moduleConfigCheck' => $modulesConfigCheck,
+                    'checkMailNotification' => $checkMailNotification,
+                    'checkEditRobotsFile' => $checkEditRobotsFile
+                ]
+            );
     }
 }

@@ -176,6 +176,23 @@
                     <p>{intl l='Check the modules configuration page to disable MailCatcher.' d='healthstatus.bo.default'}</p>
                 </div>
                 {/if}
+                {if $checkEditRobotsFile === disabled}
+                <button class='toggleButton' aria-expanded='false'>
+                    {intl l='Your robots.txt file doesn\'t exist or is not configured correctly' d='healthstatus.bo.default'}
+                    <i class='fas fa-chevron-down'></i>
+                </button>
+                <div class='health-check-accordion-panel hidden'>
+                    <p>{intl l='Check the modules configuration page to enable the module that generates the robots.txt file.' d='healthstatus.bo.default'}</p>
+                </div>
+                {else}
+                <button class='toggleButton' aria-expanded='false'>
+                    {intl l='Your robots.txt file exists' d='healthstatus.bo.default'}
+                    <i class='fas fa-chevron-down'></i>
+                </button>
+                <div class='health-check-accordion-panel hidden'>
+                    <p>{intl l='Check the modules configuration page to edit your robots.txt file.' d='healthstatus.bo.default'}</p>
+                </div>
+                {/if}
             </div>
         </div>
     </div>
