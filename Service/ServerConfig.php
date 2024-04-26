@@ -5,6 +5,7 @@ namespace HealthStatus\Service;
 use EditRobotTxt\Model\RobotsQuery;
 use HealthStatus\HealthStatus;
 use Thelia\Model\ConfigQuery;
+use Thelia\Model\ModuleQuery;
 
 class ServerConfig
 {
@@ -124,14 +125,13 @@ class ServerConfig
 
         $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-        curl_close($ch);
+        try {
+            $fileContent = file_get_contents($url);
+        } catch (\Exception $e) {
+            return 'disabled';
+        }
 
-        $configRobots = RobotsQuery::create()
-            ->findOneByDomainName($_SERVER['HTTP_HOST']);
-
-        $fileContent = $configRobots->getRobotsContent();
-
-        if ($status === 200 && $fileContent !== null &&
+        if ($status === 200 &&
             str_contains($fileContent, '@url: ' . $protocol . "://" . $_SERVER['HTTP_HOST']) &&
             str_contains($fileContent, 'Sitemap: ' . $protocol . "://" . $_SERVER['HTTP_HOST'] . '/sitemap')) {
             return 'enabled';
