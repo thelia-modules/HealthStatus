@@ -54,6 +54,10 @@ return [
     'Memory usage' => 'Utilisation mémoire',
     'Peak memory usage' => 'Pic d\'utilisation mémoire',
     'bytes' => 'octets',
+    'Your robots.txt file doesn\'t exist or is not configured correctly' => 'Votre fichier robots.txt n\'existe pas ou n\'est pas correctement configuré',
+    'Check the modules configuration page to enable the module or edit your robots.txt file.' => 'Vérifiez la page de configuration des modules pour activer le module ou éditer votre fichier robots.txt.',
+    'Your robots.txt file exists and is configured correctly' => 'Votre fichier robots.txt existe et est correctement configuré',
+    'Check the modules configuration page to edit your robots.txt file.' => 'Vérifiez la page de configuration des modules pour éditer votre fichier robots.txt.',
 
     ##### SERVER #####
     'Server Overview' => 'Vue d\'ensemble du serveur',
@@ -79,6 +83,7 @@ return [
     'Max Allowed Packet' => 'Paquets max autorisés',
     'Max Connections' => 'Connexions max',
     'You have missing PHP extensions' => 'Vous avez des extensions PHP manquantes',
+    'is the current version of PHP you are using. We recommend you to upgrade to the latest version of PHP.' => 'est la version actuelle de PHP que vous utilisez. Nous vous recommandons de passer à la dernière version de PHP.',
 
     ##### Security #####
     'Security Overview' => 'Vue d\'ensemble de la sécurité',
