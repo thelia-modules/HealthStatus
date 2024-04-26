@@ -26,12 +26,13 @@
                         </tr>
                         {foreach $activeModules as $module}
                         <tr>
-                            <td data-export-label="">{$module.code} - {$module.title}</td>
-                            {if $module.version < $module.latestVersion}
+                            <td data-export-label="{$module.code} - {$module.title}">{$module.code} - {$module.title}</td>
+                            {if version_compare($module.version, '0') === 0 || version_compare($module.version, $module.latestVersion) < 0}
                             <td class='version-outdated'><span>{$module.version}</span></td>
                             {else}
                             <td class='version-up-to-date'><span>{$module.version}</span></td>
-                            {/if} {if $module.latestVersion === '0'}
+                            {/if}
+                            {if $module.latestVersion === '0'}
                             <td class='unknown-version'><span>{intl l='Not found' d='healthstatus.bo.default'}</span></td>
                             {else}
                             <td class='latest'><span>{$module.latestVersion}</span></td>
@@ -56,12 +57,13 @@
                         </tr>
                         {foreach $inactiveModules as $module}
                         <tr>
-                            <td data-export-label="">{$module.code} - {$module.title} {if $module.version < $module.latestVersion} {/if}</td>
-                            {if $module.version < $module.latestVersion}
+                            <td data-export-label="{$module.code} - {$module.title}">{$module.code} - {$module.title}</td>
+                            {if version_compare($module.version, '0') === 0 || version_compare($module.version, $module.latestVersion) < 0}
                             <td class='version-outdated'><span>{$module.version}</span></td>
                             {else}
                             <td class='version-up-to-date'><span>{$module.version}</span></td>
-                            {/if} {if $module.latestVersion === '0'}
+                            {/if}
+                            {if $module.latestVersion === '0'}
                             <td class='unknown-version'><span>{intl l='Not found' d='healthstatus.bo.default'}</span></td>
                             {else}
                             <td class='latest'><span>{$module.latestVersion}</span></td>
