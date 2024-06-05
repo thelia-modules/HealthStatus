@@ -1,0 +1,16 @@
+{
+    "name": "thelia/health-status-module",
+    "license": "LGPL-3.0+",
+    "type": "thelia-module",
+    "require": {
+        "thelia/installer": "~1.1",
+        "symfony/http-client": "6.4.*",
+        "firebase/php-jwt": "dev-main",
+        "ext-json": "*",
+        "ext-pdo": "*",
+        "ext-curl": "*"
+    },
+    "extra": {
+        "installer-name": "HealthStatus"
+    }
+}

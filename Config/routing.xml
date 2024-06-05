@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<routes xmlns="http://symfony.com/schema/routing"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://symfony.com/schema/routing http://symfony.com/schema/routing/routing-1.0.xsd">
+
+
+    <route id="healthstatus.configuration" path="/admin/module/healthstatus/config" methods="post">
+        <default key="_controller">HealthStatus\Controller\ConfigController::setAction</default>
+    </route>
+
+    <route id="healthstatus.regenerate" path="/admin/module/healthstatus/regenerate" methods="post">
+        <default key="_controller">HealthStatus\Controller\ConfigController::regenerateKey</default>
+    </route>
+
+    <route id="healthstatus.authorize.url" path="/admin/module/healthstatus/authorize" methods="post">
+        <default key="_controller">HealthStatus\Controller\ConfigController::authorizeUrl</default>
+    </route>
+
+    <route id="healthstatus.authorize.url" path="/admin/module/healthstatus/not-authorize" methods="post">
+        <default key="_controller">HealthStatus\Controller\ConfigController::notAuthorizeUrl</default>
+    </route>
+
+    <!--
+
+    if a /admin/module/healthstatus/ route is provided, a "ConfigHealth" button will be displayed
+    for the module in the module list. Clicking this button will invoke this route.
+
+    <route id="my_route_id" path="/admin/module/healthstatus">
+        <default key="_controller">HealthStatus\Full\Class\Name\Of\YourConfigurationController::methodName</default>
+    </route>
+
+    <route id="my_route_id" path="/admin/module/healthstatus/route-name">
+        <default key="_controller">HealthStatus\Full\Class\Name\Of\YourAdminController::methodName</default>
+    </route>
+
+    <route id="my_route_id" path="/my/route/name">
+        <default key="_controller">HealthStatus\Full\Class\Name\Of\YourOtherController::methodName</default>
+    </route>
+
+    ...add as many routes as required.
+
+    <route>
+    ...
+    </route>
+    -->
+
+</routes>

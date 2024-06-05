@@ -1,0 +1,49 @@
+<div class="general-block-decorator">
+    <div class="row">
+        <div class="col-md-12 title title-without-tabs">
+            {intl l='Configure your key to get your data' }
+        </div>
+        <div class="col-md-12" style="margin-top: 15px">
+            <label>Secret Key :</label>
+            <form method="POST" class="form-health" action="{url path="/admin/module/healthstatus/regenerate"}" >
+            <button type="submit" class="form-submit-button btn btn-default">Regenerate key</button>
+            <input type="text" value="{$secret_key}" class="form-control" readonly>
+            </form>
+            {form name="healthstatus_configuration"}
+            <form method="POST" action="{url path="/admin/module/healthstatus/config"}" style="margin-top: 15px">
+            {form_hidden_fields form=$form}
+            {form_field form=$form field="success_url"}
+            <input type="hidden" name="{$name}" value="{url path='/admin/module/HealthStatus'}">
+            {/form_field}
+            {render_form_field form=$form field="algorithm" class="form-control" type="select"}
+            {render_form_field form=$form field="expiration_time" class="form-control" type="text"}
+            {render_form_field form=$form field="url_share" class="form-control" type="select"}
+            <span class="input-group-btn">
+                <button type="submit" class="form-submit-button btn btn-default">Save</button>
+            </span>
+            <br>
+            {if $expiration_time > 0}
+            <div class="alert alert-info" role="alert">
+                {intl l='Your token expires in '} {$expiration_time} {intl l='minutes.'}
+            </div>
+            {else}
+            <div class="alert alert-danger" role="alert">
+                {intl l='Your token has expired.'}
+            </div>
+            {/if}
+            {/form}
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-health {
+        display: flex;
+        gap: 10px;
+    }
+
+    .form-health .form-control {
+        width: 500px;
+    }
+
+</style>
