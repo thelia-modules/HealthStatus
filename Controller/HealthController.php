@@ -24,10 +24,12 @@ use HealthStatus\Service\PerformanceConfig;
 use HealthStatus\Service\ServerConfig;
 use HealthStatus\Service\TheliaConfig;
 use Propel\Runtime\Exception\PropelException;
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\GenericEvent;
 use Thelia\Controller\Admin\BaseAdminController;
 use Symfony\Component\Routing\Annotation\Route;
+use Thelia\Model\ModuleConfigQuery;
 
 /**
  * @Route("/admin/healthstatus", name="health")
@@ -44,6 +46,7 @@ class HealthController extends BaseAdminController
     /**
      * @Route("/show", name="_show_info", methods="GET")
      * @throws PropelException
+     * @throws InvalidArgumentException
      */
     public function index(EventDispatcherInterface $eventDispatcher)
     {
@@ -92,6 +95,8 @@ class HealthController extends BaseAdminController
         $extensions = $extensions->getExtensionsConfig();
         $extensions = $extensions['extensions'];
 
+        $urlShare = $this->getShareUrl();
+
         $order = new OrderConfig();
         $lastOrder = $order->getLastOrder();
         $lastOrderValue = $lastOrder['lastOrderDate'];
@@ -125,8 +130,22 @@ class HealthController extends BaseAdminController
                     'checkAdminRoute' => $checkAdminRoute,
                     'moduleConfigCheck' => $modulesConfigCheck,
                     'checkMailNotification' => $checkMailNotification,
-                    'checkEditRobotsFile' => $checkEditRobotsFile
+                    'checkEditRobotsFile' => $checkEditRobotsFile,
+                    'urlShare' => $urlShare
                 ]
             );
+    }
+    private function getShareUrl(): ?string
+    {
+        $url = ModuleConfigQuery::create()
+            ->filterByModuleId(HealthStatus::getModuleId())
+            ->filterByName('share_url')
+            ->findOne();
+
+        if ($url === null) {
+            return '';
+        }
+
+        return $url->getValue();
     }
 }

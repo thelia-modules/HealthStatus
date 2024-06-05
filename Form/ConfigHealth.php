@@ -3,10 +3,13 @@
 namespace HealthStatus\Form;
 
 use HealthStatus\HealthStatus;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Constraints\GreaterThan;
 use Thelia\Form\BaseForm;
+use function Symfony\Component\Translation\t;
+
 class ConfigHealth extends BaseForm
 {
     protected function buildForm(): void
@@ -21,7 +24,7 @@ class ConfigHealth extends BaseForm
                 'HS384' => 'HS384',
                 'HS512' => 'HS512',
             ],
-            'required' => true,
+            'required' => false,
             'data' => $algorithm
         ]);
 
@@ -35,7 +38,7 @@ class ConfigHealth extends BaseForm
 
         $form->add('expiration_time', TextType::class, [
             'label' => 'Expiration time (in minutes)',
-            'required' => true,
+            'required' => false,
             'data' => $expirationTime,
             'constraints' => [
                 new GreaterThan([
@@ -43,6 +46,18 @@ class ConfigHealth extends BaseForm
                     'message' => 'The expiration time must be greater than 0.',
                 ]),
             ],
+        ]);
+
+        $urlShare = HealthStatus::getUrlShare();
+
+        $form->add('url_share', ChoiceType::class, [
+            'label' => 'URL Share',
+            'choices' => [
+                'Yes' => 1,
+                'No' => 0,
+            ],
+            'required' => false,
+            'data' => $urlShare
         ]);
     }
 

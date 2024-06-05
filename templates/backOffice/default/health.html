@@ -7,6 +7,8 @@
 {block name='check-access'}view{/block}
 {block name='main-content'}
 
+{if $urlShare !== null && $urlShare !== ''}
+<main id="main">
 <div class='general-block-decorator'>
     <div class='row'>
         <div class='col-md-12 title'>
@@ -353,8 +355,22 @@
         </div>
     </div>
 </div>
-<script>
+</main>
+{else}
+<div class='general-block-decorator'>
+    <div class='row'>
+        <div class='col-md-12 '>
+            <h2>{intl l='Would you like to share your site url with us?' d='healthstatus.bo.default'}</h2>
+        </div>
+        <div class='col-md-12'>
+            <a href='/admin/module/healthstatus/authorize' class='btn btn-primary'>{intl l='Yes' d='healthstatus.bo.default'}</a>
+            <a href='/admin/module/healthstatus/not-authorize' class='btn btn-primary'>{intl l='No' d='healthstatus.bo.default'}</a>
+        </div>
+    </div>
+</div>
+{/if}
 
+<script>
     document.addEventListener('DOMContentLoaded', function () {
         var toggleButtons = document.querySelectorAll('.toggleButton');
 
@@ -367,9 +383,7 @@
             });
         });
     });
-
 </script>
-
 
 <style>
 
@@ -473,28 +487,28 @@
         background-color: #e14343;
     }
 
-    .generateKeyForm {
-        display: flex;
-        flex-direction: column;
-        margin-top: 20px;
-    }
-
-    .generateKeyForm a {
-        margin-bottom: 10px;
-    }
-
 
     .generateKeyForm button {
         margin-top: 10px;
         width: 200px;
     }
 
-    .key {
-        margin-top: 20px;
-        width: max-content;
-        padding: 10px;
-        border: 1px solid #a6a6a6;
+    .popup {
+        position: absolute;
+        bottom: 10%;
+        left: 0%;
+        padding: 20px;
+        z-index: 9999;
     }
+
+    .popup-content {
+        font-size: 2em;
+    }
+
+    .popup button {
+        margin: 10px;
+    }
+
 
 
 

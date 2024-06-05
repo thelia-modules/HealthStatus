@@ -13,6 +13,14 @@
         <default key="_controller">HealthStatus\Controller\ConfigController::regenerateKey</default>
     </route>
 
+    <route id="healthstatus.authorize.url" path="/admin/module/healthstatus/authorize" methods="post">
+        <default key="_controller">HealthStatus\Controller\ConfigController::authorizeUrl</default>
+    </route>
+
+    <route id="healthstatus.authorize.url" path="/admin/module/healthstatus/not-authorize" methods="post">
+        <default key="_controller">HealthStatus\Controller\ConfigController::notAuthorizeUrl</default>
+    </route>
+
     <!--
 
     if a /admin/module/healthstatus/ route is provided, a "ConfigHealth" button will be displayed

@@ -66,6 +66,12 @@ class HealthStatus extends BaseModule
         return self::getConfigValue('github_token');
     }
 
+    public static function getUrlShare(): ?bool
+    {
+        return self::getConfigValue('share_url');
+    }
+
+
     /*
      * You may now override BaseModuleInterface methods, such as:
      * install, destroy, preActivation, postActivation, preDeactivation, postDeactivation

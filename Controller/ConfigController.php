@@ -38,9 +38,15 @@ class ConfigController extends BaseAdminController
             $expirationTimeMin = $expirationTimeForm->getData();
             $expirationTimeSec = $expirationTimeMin * 60;
             $algorithm = $algorithm->getData();
+            $urlShare = $formData['url_share'];
+            $urlShare = $urlShare->getData();
 
             if ($expirationTimeSec !== null) {
                 HealthStatus::setConfigValue('expiration_time', time() + $expirationTimeSec);
+            }
+
+            if ($urlShare !== null) {
+                HealthStatus::setConfigValue('share_url', $urlShare);
             }
 
             if ($algorithm !== null) {
@@ -79,4 +85,26 @@ class ConfigController extends BaseAdminController
         HealthStatus::setConfigValue('secret_key', bin2hex(random_bytes(32)));
         return $this->generateRedirectFromRoute('admin.module.configure', [], ['module_code' => 'HealthStatus']);
     }
+
+    /**
+     * @Route("/authorize", name="health_authorize_url")
+     */
+    public function authorizeUrl()
+    {
+        HealthStatus::setConfigValue('share_url', 1);
+
+       return $this->generateRedirectFromRoute('admin.module.configure', [], ['module_code' => 'HealthStatus']);
+    }
+
+
+    /**
+     * @Route("/not-authorize", name="health_not_authorize_url")
+     */
+    public function notAuthorizeUrl()
+    {
+        HealthStatus::setConfigValue('share_url', 0);
+
+        return $this->generateRedirectFromRoute('admin.module.configure', [], ['module_code' => 'HealthStatus']);
+    }
+
 }
