@@ -13,7 +13,7 @@
     <language>en_US</language>
     <language>fr_FR</language>
   </languages>
-  <version>0.0.0</version>
+  <version>1.0.0</version>
   <authors>
     <author>
       <name>Franck Allimant</name>
@@ -22,10 +22,10 @@
       <website>www.openstudio.fr</website>
     </author>
     <author>
-      <name>Bertrand Tourlonias</name>
+      <name>Gregory Laissus</name>
       <company>OpenStudio</company>
-      <email>btourlonias@openstudio.fr</email>
-      <website>www.openstudio.fr</website>
+      <email>gregory.laissus@etudiant.univ-reims.fr</email>
+      <website>gregory-laissus.fr</website>
     </author>
   </authors>
   <type>classic</type>
