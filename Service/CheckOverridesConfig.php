@@ -17,34 +17,40 @@ class CheckOverridesConfig
         }
         return $overrides;
     }
+
     private function processPaths($paths, &$overrides)
     {
-        foreach ($paths as $path) {
+        foreach ($paths as $namespace => $path) {
             if (is_array($path)) {
-                $this->processPaths($path, $overrides);
+                foreach ($path as $subPath) {
+                    $this->addOverridesFromPath($subPath, $overrides);
+                }
             } else {
-                $this->addOverrideIfPathStartsWithOverride($path, $overrides);
+                $this->addOverridesFromPath($path, $overrides);
             }
         }
     }
-    private function addOverrideIfPathStartsWithOverride($path, &$overrides)
+
+    private function addOverridesFromPath($path, &$overrides)
     {
-        if (str_starts_with($path, 'override/')) {
+        if (strpos($path, 'override/') === 0) {
             $overridePath = THELIA_ROOT.'/'.$path;
             if (file_exists($overridePath)) {
-                $overridesList = scandir($overridePath);
-                $path = str_replace(THELIA_ROOT, '', $path);
-                foreach ($overridesList as $value) {
-                    if ($value !== '.' && $value !== '..') {
-                        $fullPath = $overridePath.'/'.$value;
-                        if (!is_dir($fullPath)) {
-                            $overrides[] = [
-                                'path' => $path,
-                                'file' => $value
-                            ];
-                        }
-                    }
-                }
+                $this->scanOverrideDirectory($overridePath, $overrides);
+            }
+        }
+    }
+
+    private function scanOverrideDirectory($directory, &$overrides)
+    {
+        $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($directory));
+        foreach ($files as $file) {
+            if ($file->isFile()) {
+                $relativePath = str_replace(THELIA_ROOT, '', $file->getPathname());
+                $overrides[] = [
+                    'path' => dirname($relativePath),
+                    'file' => basename($relativePath)
+                ];
             }
         }
     }
