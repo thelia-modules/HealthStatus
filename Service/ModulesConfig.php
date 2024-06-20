@@ -3,7 +3,9 @@
 namespace HealthStatus\Service;
 
 use Exception;
+use HealthStatus\HealthStatus;
 use Psr\Cache\InvalidArgumentException;
+use Thelia\Model\ModuleConfigQuery;
 use Thelia\Model\ModuleQuery;
 
 class ModulesConfig
@@ -12,7 +14,7 @@ class ModulesConfig
      * @throws InvalidArgumentException
      */
 
-    public function getModulesAndSendToEndpoint($url): array
+    public function getModulesAndSendToEndpoint($url, $share): array
     {
         $modulesList = [];
 
@@ -35,6 +37,12 @@ class ModulesConfig
             curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
+            $headers = [
+                'Content-Type: application/json',
+                'Share-Data: ' . ($share)
+            ];
+
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             $result = curl_exec($ch);
 
             if (curl_errno($ch)) {
@@ -58,7 +66,14 @@ class ModulesConfig
     {
         $url = '';
 
-        $remoteModulesList = $this->getModulesAndSendToEndpoint($url);
+        $share = ModuleConfigQuery::create()
+            ->filterByModuleId(HealthStatus::getModuleId())
+            ->filterByName('share_url')
+            ->findOne();
+
+        $share->getValue() === '1' ? $share = true : $share = false;
+
+        $remoteModulesList = $this->getModulesAndSendToEndpoint($url, $share);
 
         if (!empty($remoteModulesList)) {
             return $remoteModulesList;
